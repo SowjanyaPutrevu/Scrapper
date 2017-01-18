@@ -27,10 +27,7 @@ public abstract class Scrapper {
 
         try {
             URL url = new URL(site);
-
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(url.openStream()));
-
+            BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
             String inputLine;
             StringBuilder sb = new StringBuilder();
             while ((inputLine = in.readLine()) != null){

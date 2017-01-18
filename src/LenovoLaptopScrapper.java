@@ -16,10 +16,11 @@ import static javax.management.Query.attr;
  */
 public class LenovoLaptopScrapper extends Scrapper {
 
-    public static final String BASE_URL = "http://shop.lenovo.com";
+    public static final String BASE_URL = "http://shop.lenovo.com/";
     public static final String SPECS_URL = "http://shop.lenovo.com/nl/nl/laptops/?menu-id=laptops_en_ultrabooks";
     public static final String BRANDNAME_CLASS = "mobileBrandName";
     public static final String BRAND_URL = "http://shop.lenovo.com/SEUILibrary/controller/e/nlweb/LenovoPortal/nl_NL/wci.workflow:load?page=/WW/wci3/emea_shared/nl/common/splitter-v5/%data%.html";
+
 //http://shop.lenovo.com/SEUILibrary/controller/e/nlweb/LenovoPortal/nl_NL/wci.workflow:load?page=/WW/wci3/emea_shared/nl/common/splitter-v5/thinkpad.html
     public static void main(String[] args) throws Exception {
         Scrapper scrapper = new LenovoLaptopScrapper();
@@ -36,7 +37,7 @@ public class LenovoLaptopScrapper extends Scrapper {
         for (String name : brandNames) {
             String url = BRAND_URL.replace("%data%", name);
             html = scrapper.get_html(url);
-            System.out.println(html);
+            //System.out.println(html);
             document = scrapper.parse_html(html);
             Elements anchors = document.getElementsByTag("a");
             for (Element e : anchors) {
@@ -51,8 +52,8 @@ public class LenovoLaptopScrapper extends Scrapper {
             System.out.println(i);
             html = scrapper.get_html(i);
             document = scrapper.parse_html(html);
-            Map<String,List<String>> map =newscrapper.get_data(document);
-            PrintWriter pw = new PrintWriter(new File("C:\\Users\\Sowji\\Documents\\LenovoLaptops\\test"+ URLEncoder.encode(i, "UTF-8")+".csv"));
+            Map<String,List<String>> map = newscrapper.get_data(document);
+            PrintWriter pw = new PrintWriter(new File("C:\\Users\\Sowji\\Documents\\Lenovo\\LenovoLaptops\\test"+ URLEncoder.encode(i, "UTF-8")+".csv"));
 
             for (Map.Entry<String, List<String>> entry : map.entrySet()) {
                 //System.out.println("Key: " + entry.getKey() + " Value : "  + entry.getValue() );
