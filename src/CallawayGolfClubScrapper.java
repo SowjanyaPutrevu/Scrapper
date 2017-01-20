@@ -33,7 +33,22 @@ public class CallawayGolfClubScrapper extends Scrapper {
             String brandHtml = scrapper.get_html(brandUrl);
             Document document = scrapper.parse_html(brandHtml);
             Elements metaTags = document.getElementsByTag("meta");
-
+            Elements descClass = document.getElementsByClass("row product-technology-feature");
+            for (Element desc : descClass) {
+                Elements img = desc.getElementsByTag("img");
+                Elements headings = desc.getElementsByTag("h2");
+                for(Element image : img) {
+                    for (Element heading : headings) {
+                        Elements texts = desc.getElementsByTag("p");
+                        for (Element text : texts) {
+                            System.out.println(text.text());
+                        }
+                        System.out.println(heading.text());
+                    }
+                    System.out.println(image.attr("src"));
+                }
+            }
+            /*
             String brandName = null;
             for (Element tags : metaTags) {
                 if (tags.attr("itemprop").equals("name")) {
@@ -57,5 +72,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
         }
         System.out.println(map.size());
 
+*/
+        }
     }
 }
