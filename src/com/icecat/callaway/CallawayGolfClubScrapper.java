@@ -40,7 +40,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
     private String getSpecsUrl(String brandUrl) {
         String[] tokens = brandUrl.split("/");
         String name = tokens[tokens.length - 1].replace(".html","");
-        return Constants.PRODUCT_SPECS_URL.replace("%data", name );
+        return Constants.PRODUCT_SPECS_URL.replace("%data%", name );
     }
 
     public BrandSpecs getBrandSpecs(String brandUrl){
@@ -151,7 +151,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
         JSONObject object = new JSONObject(html);
         attributes = parseJson( object.getJSONArray("attributes"), 1 );
         options  = parseJson( object.getJSONArray("options"), 0 );
-        if(step == 7 ) {
+        if( step == attributes.size() - 1 ) {
             ProductSpecs product = new ProductSpecs();
             product.setSpecifications(specList);
             Specification spec = specList.get(step);
@@ -301,12 +301,14 @@ public class CallawayGolfClubScrapper extends Scrapper {
         CallawayGolfClubScrapper scrapper = new CallawayGolfClubScrapper();
         //Step1 - get Brand Urls
         //List<String> brandUrls =  scrapper.getBrandUrls();
-        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"};
+        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html","http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"};
         for(String brandUrl : brandUrls) {
             //Step 2: get Brand Specs
             BrandSpecs brandSpecs = scrapper.getBrandSpecs(brandUrl);
             //Step 3: get Product Specs
             Set<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl);
+
+            //TODO write to file
         }
     }
 }
