@@ -2,6 +2,9 @@ package com.icecat.callaway;
 import java.util.*;
 
 import com.icecat.*;
+import jdk.nashorn.internal.parser.JSONParser;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -79,10 +82,10 @@ public class CallawayGolfClubScrapper extends Scrapper {
                     List<List<Specification>> tableData = parseTable(element);
                     for(List<Specification> row : tableData){
                         if( !isModel ) {
-                            String k = key+ "_" + row.get(0).getValues().get(0);
+                            String k = key+ "_" + row.get(0).getValues();
                             generalSpecs.put(k, row);
                         } else {
-                            String k = key + "_" + model + "_" + row.get(1).getValues().get(0);
+                            String k = key + "_" + model + "_" + row.get(1).getValues();
                             modelSpecs.put(k, row);
                         }
                     }
@@ -122,20 +125,100 @@ public class CallawayGolfClubScrapper extends Scrapper {
         return skuList;
     }
 
-    public ProductSpecs getProductSpecs(String sku){
-        String html = get_html(Constants.CART_URL.replace("%data%", sku));
+    public List<ProductSpecs> getProducts(String brandUrl){
+        String html = get_html(brandUrl);
         System.out.println(html);
         Document document = parse_html(html);
-        return getProductSpecs(document);
+        return getProducts(document);
+    }
+
+    public List<ProductSpecs> getProducts(Document brandDocument){
+        List<ProductSpecs> products = new ArrayList<>();
+        Element form = brandDocument.getElementById(Constants.BRAND_PRODUCT_CONFIG_FORM_ID);
+        String url = form.attr("action");
+        Elements inputs = form.getElementsByTag("input");
+        for(Element input : inputs) {
+            String name = input.attr("name");
+            String value = input.attr("value");
+            url += "&"+name+"="+value;
+        }
+        String json = get_html(url);
+        JSONObject jsonObject = new JSONObject(json);
+        Map<String, List<Specification>> attributes = new HashMap<>();
+        Map<String, ProductSpecs> productsMap = new HashMap<>();
+
+        JSONArray jsonArray = jsonObject.getJSONArray("attributes");
+        for( int i=0; i < jsonArray.length(); i++ ){
+            JSONObject object =(JSONObject)jsonArray.get(i);
+            String key = (String)object.get("name");
+            JSONArray values = (JSONArray)object.get("values");
+            List<Specification> specificationList = new ArrayList<>();
+            for(Object obj : values) {
+                JSONObject value = (JSONObject) obj;
+                Specification specification = new Specification();
+                specification.setName(key);
+                specification.setValues((String)value.get("displayValue"));
+                specification.setSourceAttributeId((String)object.get("id"));
+                specification.setSourceAttributeValue((String)value.get("id"));
+                specificationList.add(specification);
+            }
+            attributes.put(key, specificationList);
+        }
+
+        jsonArray = jsonObject.getJSONArray("options");
+        for( int i=0; i < jsonArray.length(); i++ ){
+            JSONObject object =(JSONObject)jsonArray.get(i);
+            String key = (String)object.get("name");
+            JSONArray values = (JSONArray)object.get("values");
+            List<Specification> specificationList = new ArrayList<>();
+            for(Object obj : values) {
+                JSONObject value = (JSONObject) obj;
+                Specification specification = new Specification();
+                specification.setName(key);
+                specification.setValues((String)value.get("displayValue"));
+                specification.setSourceAttributeId((String)object.get("id"));
+                specification.setSourceAttributeValue((String)value.get("id"));
+                specification.setBrand((String)value.get("brand"));
+                specification.setModel((String)value.get("model"));
+                specificationList.add(specification);
+            }
+            attributes.put(key, specificationList);
+        }
+
+        jsonArray = jsonObject.getJSONArray("shaft");
+        for( int i=0; i < jsonArray.length(); i++ ){
+            JSONObject object =(JSONObject)jsonArray.get(i);
+            String key = (String)object.get("name");
+            JSONArray values = (JSONArray)object.get("values");
+            List<Specification> specificationList = new ArrayList<>();
+            for(Object obj : values) {
+                JSONObject value = (JSONObject) obj;
+                Specification specification = new Specification();
+                specification.setName(key);
+                specification.setValues((String)value.get("displayValue"));
+                specification.setSourceAttributeId((String)object.get("id"));
+                specification.setSourceAttributeValue((String)value.get("id"));
+                specification.setBrand((String)value.get("brand"));
+                specification.setModel((String)value.get("model"));
+                specificationList.add(specification);
+            }
+            attributes.put(key, specificationList);
+        }
+
+
+        return products;
     }
 
     /*
     Apparently, the easiest way to get item specs is by adding it to the cart!
      */
-    private ProductSpecs getProductSpecs(Document productDocument){
+    private ProductSpecs getProductSpecsFromCart(Document productDocument){
         ProductSpecs productSpecs = new ProductSpecs();
 
+
         Element cartItem = productDocument.getElementsByClass(Constants.CART_0_ITEM_CLASS).first();
+        if (cartItem == null) return productSpecs;
+
         Elements images = cartItem.getElementsByClass(Constants.CART_ITEM_IMAGE_CLASS);
         List<String> imageUrls = Utils.getImageUrls(images.first().getElementsByTag("img"));
         productSpecs.setImagesList(imageUrls);
@@ -150,9 +233,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
                 Elements spans = li.children();
                 Specification spec = new Specification();
                 spec.setName(spans.get(0).text());
-                List<String> values = new ArrayList<>();
-                spec.setValues(values);
-                values.add(spans.get(1).text());
+                spec.setValues(spans.get(1).text());
                 specsList.add(spec);
             }
         }
@@ -167,8 +248,14 @@ public class CallawayGolfClubScrapper extends Scrapper {
 
     public static void main(String[] args) {
         CallawayGolfClubScrapper scrapper = new CallawayGolfClubScrapper();
-        //BrandSpecs brandSpecs = scrapper.getBrandSpecs("http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017");
-        ProductSpecs productSpecs = scrapper.getProductSpecs("spr4625662");
+        //http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html
+        //http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductConfigurator-FilteredAttributes?format=json&pid=drivers-great-big-bertha-epic-2017&vid=drivers-great-big-bertha-epic-2017&cgid=drivers&qty=1&condition=BNW&a1509=6340&a44=69&a71=5711&option_2-CEX-166bp9472=14985&option_1661-CEX-166bp9472=7496&option_3-CEX-166bp9472=6098&option_54-CEX-166bp9472=14978%7C98%7C100720%7C5692%7C5693
+        String brandUrl = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017";
+        BrandSpecs brandSpecs =
+                scrapper.getBrandSpecs("http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017");
+        System.out.println(Scrapper.cookies);
+        List<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl);
+        System.out.println(Scrapper.cookies);
         System.out.println(productSpecs);
     }
 }

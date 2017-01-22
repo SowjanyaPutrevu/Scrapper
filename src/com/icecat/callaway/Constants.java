@@ -19,6 +19,7 @@ class Constants {
     static final String CART_ITEM_IMAGE_CLASS = "lineItemImage";
     static final String CART_0_ITEM_CLASS = "shipment-0-item-0";
     static final String CART_PRICE_SUBTOTAL = "itemPriceSubtotal";
+    static final String BRAND_PRODUCT_CONFIG_FORM_ID = "product-configurator-ajax-form";
 
 
 }

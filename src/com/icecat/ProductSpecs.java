@@ -18,6 +18,12 @@ public class ProductSpecs {
 
     private String price;
 
+    private String brand;
+
+    private String sourceId;
+
+    private String model;
+
     private List<Specification> specifications;
 
     public List<String> getImagesList() {
@@ -56,7 +62,45 @@ public class ProductSpecs {
         this.price = price;
     }
 
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
     public List<Specification> getSpecifications() {
         return specifications;
+    }
+
+    public String getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(String sourceId) {
+        this.sourceId = sourceId;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    @Override
+    public String toString() {
+        return "ProductSpecs{" +
+                "imagesList=" + imagesList +
+                ", description='" + description + '\'' +
+                ", name='" + name + '\'' +
+                ", price='" + price + '\'' +
+                ", brand='" + brand + '\'' +
+                ", sourceId='" + sourceId + '\'' +
+                ", model='" + model + '\'' +
+                ", specifications=" + specifications +
+                '}';
     }
 }

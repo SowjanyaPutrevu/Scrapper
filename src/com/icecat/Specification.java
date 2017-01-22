@@ -12,11 +12,21 @@ public class Specification {
 
     private List<String> attributes;
 
-    private List<String> values;
+    private String values;
 
     private String desc;
 
     private String type;
+
+    private String productId;
+
+    private String sourceAttributeId;
+
+    private String sourceAttributeValue;
+
+    private String brand;
+
+    private String model;
 
     public String getName() {
         return name;
@@ -26,12 +36,36 @@ public class Specification {
         this.name = name;
     }
 
-    public List<String> getValues() {
+    public String getValues() {
         return values;
     }
 
-    public void setValues(List<String> values) {
+    public void setValues(String values) {
         this.values = values;
+    }
+
+    public String getProductId() {
+        return productId;
+    }
+
+    public void setProductId(String productId) {
+        this.productId = productId;
+    }
+
+    public String getSourceAttributeId() {
+        return sourceAttributeId;
+    }
+
+    public void setSourceAttributeId(String sourceAttributeId) {
+        this.sourceAttributeId = sourceAttributeId;
+    }
+
+    public String getSourceAttributeValue() {
+        return sourceAttributeValue;
+    }
+
+    public void setSourceAttributeValue(String sourceAttributeValue) {
+        this.sourceAttributeValue = sourceAttributeValue;
     }
 
     public String getDesc() {
@@ -66,14 +100,35 @@ public class Specification {
         this.attributes = attributes;
     }
 
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
     @Override
     public String toString() {
         return "Specification{" +
                 "name='" + name + '\'' +
                 ", attributes=" + attributes +
-                ", values=" + values +
+                ", values='" + values + '\'' +
                 ", desc='" + desc + '\'' +
                 ", type='" + type + '\'' +
+                ", productId='" + productId + '\'' +
+                ", sourceAttributeId='" + sourceAttributeId + '\'' +
+                ", sourceAttributeValue='" + sourceAttributeValue + '\'' +
+                ", brand='" + brand + '\'' +
+                ", model='" + model + '\'' +
                 '}';
     }
 }

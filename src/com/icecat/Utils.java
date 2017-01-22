@@ -47,8 +47,7 @@ public class Utils {
                     continue;
                 } else {
                     specification.setName(colNames.get(j));
-                    List<String> values = new ArrayList<>();
-                    values.add(td.text());
+                    String values = td.text();
                     specification.setValues(values);
                 }
                 specList.add(specification);
