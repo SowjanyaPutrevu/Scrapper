@@ -144,19 +144,16 @@ public class CallawayGolfClubScrapper extends Scrapper {
         JSONObject object = new JSONObject(html);
         attributes = parseJson( object.getJSONArray("attributes"), 1 );
         options  = parseJson( object.getJSONArray("options"), 0 );
-        List<Specification> newList = new ArrayList<>(specList);
         if(step == 7 ) {
-            List<Specification> values = attributes.get(step+"");
-            for(Specification spec : values){
-                ProductSpecs product = new ProductSpecs();
-                newList.add(spec);
-                product.setSpecifications(newList);
-                product.setPrice(spec.getAttributes().get("variantPrice"));
-                product.setSourceId(spec.getProductId());
-                products.add(product);
-            }
+            ProductSpecs product = new ProductSpecs();
+            product.setSpecifications(specList);
+            Specification spec = specList.get(step);
+            product.setPrice(spec.getAttributes().get("variantPrice"));
+            product.setSourceId(spec.getProductId());
+            products.add(product);
         } else {
             for( int i=0; i< attributes.get(""+ (step+1)).size(); i++ ) {
+                List<Specification> newList = new ArrayList<>(specList);
                 newList.add(attributes.get((step+1)+"").get(i));
                 fetchProduct(step+1, attributes, options, shafts, i, products, baseUrl, newList );
             }
