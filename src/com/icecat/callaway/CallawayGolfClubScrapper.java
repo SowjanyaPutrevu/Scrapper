@@ -37,8 +37,15 @@ public class CallawayGolfClubScrapper extends Scrapper {
         return Utils.getImageUrls(images);
     }
 
+    private String getSpecsUrl(String brandUrl) {
+        String[] tokens = brandUrl.split("/");
+        String name = tokens[tokens.length - 1].replace(".html","");
+        return Constants.PRODUCT_SPECS_URL.replace("%data", name );
+    }
+
     public BrandSpecs getBrandSpecs(String brandUrl){
-        String brandHtml = get_html(brandUrl);
+        String specsUrl = getSpecsUrl(brandUrl);
+        String brandHtml = get_html(specsUrl);
         Document document = parse_html(brandHtml);
         return getBrandSpecs(document);
     }
@@ -285,17 +292,21 @@ public class CallawayGolfClubScrapper extends Scrapper {
     }
 
     public static void main(String[] args) {
-        CallawayGolfClubScrapper scrapper = new CallawayGolfClubScrapper();
-        //http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html
-        //http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductConfigurator-FilteredAttributes?format=json&pid=drivers-great-big-bertha-epic-2017&vid=drivers-great-big-bertha-epic-2017&cgid=drivers&qty=1&condition=BNW&a1509=6340&a44=69&a71=5711&option_2-CEX-166bp9472=14985&option_1661-CEX-166bp9472=7496&option_3-CEX-166bp9472=6098&option_54-CEX-166bp9472=14978%7C98%7C100720%7C5692%7C5693
         //String brandUrl = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017";
-        //String brandUrl = "http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html";
-        String brandUrl = "http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html";
         //BrandSpecs brandSpecs =
         //        scrapper.getBrandSpecs("http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017");
         //System.out.println(Scrapper.cookies);
-        Set<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl);
-//        /System.out.println(Scrapper.cookies);
-        System.out.println(productSpecs);
+//      String brandUrl = "http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html";
+
+        CallawayGolfClubScrapper scrapper = new CallawayGolfClubScrapper();
+        //Step1 - get Brand Urls
+        //List<String> brandUrls =  scrapper.getBrandUrls();
+        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"};
+        for(String brandUrl : brandUrls) {
+            //Step 2: get Brand Specs
+            BrandSpecs brandSpecs = scrapper.getBrandSpecs(brandUrl);
+            //Step 3: get Product Specs
+            Set<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl);
+        }
     }
 }
