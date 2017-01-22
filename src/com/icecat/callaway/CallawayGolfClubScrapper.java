@@ -133,7 +133,6 @@ public class CallawayGolfClubScrapper extends Scrapper {
 
     public Set<ProductSpecs> getProducts(String brandUrl){
         String html = get_html(brandUrl);
-        System.out.println(html);
         Document document = parse_html(html);
         return getProducts(document);
     }
