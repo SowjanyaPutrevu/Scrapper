@@ -1,6 +1,7 @@
 package com.icecat;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Sowji on 21/01/2017.
@@ -10,7 +11,7 @@ public class Specification {
 
     private String name;
 
-    private List<String> attributes;
+    private Map<String, String> attributes;
 
     private String values;
 
@@ -76,18 +77,6 @@ public class Specification {
         this.desc = desc;
     }
 
-    public List<String> getAttribute() {
-        return attributes;
-    }
-
-    public void setAttribute(List<String> attribute) {
-        this.attributes = attribute;
-    }
-
-    public List<String> getAttributes() {
-        return attributes;
-    }
-
     public String getType() {
         return type;
     }
@@ -96,7 +85,11 @@ public class Specification {
         this.type = type;
     }
 
-    public void setAttributes(List<String> attributes) {
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, String> attributes) {
         this.attributes = attributes;
     }
 

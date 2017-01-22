@@ -103,4 +103,20 @@ public class ProductSpecs {
                 ", specifications=" + specifications +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ProductSpecs that = (ProductSpecs) o;
+
+        return sourceId != null ? sourceId.equals(that.sourceId) : that.sourceId == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return sourceId != null ? sourceId.hashCode() : 0;
+    }
 }

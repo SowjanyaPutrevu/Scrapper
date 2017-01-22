@@ -2,7 +2,6 @@ package com.icecat.callaway;
 import java.util.*;
 
 import com.icecat.*;
-import jdk.nashorn.internal.parser.JSONParser;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
@@ -125,88 +124,130 @@ public class CallawayGolfClubScrapper extends Scrapper {
         return skuList;
     }
 
-    public List<ProductSpecs> getProducts(String brandUrl){
+    public Set<ProductSpecs> getProducts(String brandUrl){
         String html = get_html(brandUrl);
         System.out.println(html);
         Document document = parse_html(html);
         return getProducts(document);
     }
 
-    public List<ProductSpecs> getProducts(Document brandDocument){
-        List<ProductSpecs> products = new ArrayList<>();
+    private void fetchProduct(int step, Map<String, List<Specification>> attributes, Map<String, List<Specification>> options,
+                              Map<String, List<Specification>> shafts, int attributeValueIndex, Set<ProductSpecs> products,
+                              String baseUrl, List<Specification> specList){
+        //Here step indicates current attribute, we are changing with the attributeValueIndex.
+        //So, we will increment the steps until we reach 7, where we add products. -- These are standard products
+        //Also ignoring options at this point
+        //Next we change the options
+        baseUrl += "&" + attributes.get(step+"").get(attributeValueIndex).getSourceAttributeId() + "="
+                + attributes.get(step+"").get(attributeValueIndex).getSourceAttributeValue();
+        String html = get_html(baseUrl);
+        JSONObject object = new JSONObject(html);
+        attributes = parseJson( object.getJSONArray("attributes"), 1 );
+        options  = parseJson( object.getJSONArray("options"), 0 );
+        List<Specification> newList = new ArrayList<>(specList);
+        if(step == 7 ) {
+            List<Specification> values = attributes.get(step+"");
+            for(Specification spec : values){
+                ProductSpecs product = new ProductSpecs();
+                newList.add(spec);
+                product.setSpecifications(newList);
+                product.setPrice(spec.getAttributes().get("variantPrice"));
+                product.setSourceId(spec.getProductId());
+                products.add(product);
+            }
+        } else {
+            for( int i=0; i< attributes.get(""+ (step+1)).size(); i++ ) {
+                newList.add(attributes.get((step+1)+"").get(i));
+                fetchProduct(step+1, attributes, options, shafts, i, products, baseUrl, newList );
+            }
+        }
+    }
+
+    public Set<ProductSpecs> getProducts(Document brandDocument){
+        Set<ProductSpecs> products = new HashSet<>();
+
+        //http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductConfigurator-FilteredAttributes?format=json&pid=drivers-great-big-bertha-epic-2017&vid=drivers-great-big-bertha-epic-2017&cgid=drivers&qty=1&condition=BNW
+        //http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductConfigurator-Process?&format=json&pid=drivers-great-big-bertha-epic-2017&vid=drivers-great-big-bertha-epic-2017&cgid=drivers&qty=1&condition=BNW
         Element form = brandDocument.getElementById(Constants.BRAND_PRODUCT_CONFIG_FORM_ID);
-        String url = form.attr("action");
+        String action = Constants.FILTER_ATTRIBUTES_URL;
+        String params = "?";
         Elements inputs = form.getElementsByTag("input");
+        Map<String, String> initAttributes = new HashMap<>();
+
         for(Element input : inputs) {
             String name = input.attr("name");
             String value = input.attr("value");
-            url += "&"+name+"="+value;
+            if(value!=null && !value.isEmpty()) {
+                params += "&" + name + "=" + value;
+                initAttributes.put(name, "&" + name + "=" + value);
+            }
         }
-        String json = get_html(url);
+
+        String json = get_html(action + params);
+
         JSONObject jsonObject = new JSONObject(json);
-        Map<String, List<Specification>> attributes = new HashMap<>();
-        Map<String, ProductSpecs> productsMap = new HashMap<>();
+
+        Map<String, List<Specification>> attributes;
+        Map<String, List<Specification>> options;
+        Map<String, List<Specification>> shafts;
 
         JSONArray jsonArray = jsonObject.getJSONArray("attributes");
-        for( int i=0; i < jsonArray.length(); i++ ){
-            JSONObject object =(JSONObject)jsonArray.get(i);
-            String key = (String)object.get("name");
-            JSONArray values = (JSONArray)object.get("values");
-            List<Specification> specificationList = new ArrayList<>();
-            for(Object obj : values) {
-                JSONObject value = (JSONObject) obj;
-                Specification specification = new Specification();
-                specification.setName(key);
-                specification.setValues((String)value.get("displayValue"));
-                specification.setSourceAttributeId((String)object.get("id"));
-                specification.setSourceAttributeValue((String)value.get("id"));
-                specificationList.add(specification);
-            }
-            attributes.put(key, specificationList);
-        }
+        attributes = parseJson(jsonArray, 1);
 
         jsonArray = jsonObject.getJSONArray("options");
-        for( int i=0; i < jsonArray.length(); i++ ){
-            JSONObject object =(JSONObject)jsonArray.get(i);
-            String key = (String)object.get("name");
-            JSONArray values = (JSONArray)object.get("values");
-            List<Specification> specificationList = new ArrayList<>();
-            for(Object obj : values) {
-                JSONObject value = (JSONObject) obj;
-                Specification specification = new Specification();
-                specification.setName(key);
-                specification.setValues((String)value.get("displayValue"));
-                specification.setSourceAttributeId((String)object.get("id"));
-                specification.setSourceAttributeValue((String)value.get("id"));
-                specification.setBrand((String)value.get("brand"));
-                specification.setModel((String)value.get("model"));
-                specificationList.add(specification);
-            }
-            attributes.put(key, specificationList);
-        }
+        options = parseJson(jsonArray, 0);
 
-        jsonArray = jsonObject.getJSONArray("shaft");
-        for( int i=0; i < jsonArray.length(); i++ ){
-            JSONObject object =(JSONObject)jsonArray.get(i);
-            String key = (String)object.get("name");
-            JSONArray values = (JSONArray)object.get("values");
-            List<Specification> specificationList = new ArrayList<>();
-            for(Object obj : values) {
-                JSONObject value = (JSONObject) obj;
-                Specification specification = new Specification();
-                specification.setName(key);
-                specification.setValues((String)value.get("displayValue"));
-                specification.setSourceAttributeId((String)object.get("id"));
-                specification.setSourceAttributeValue((String)value.get("id"));
-                specification.setBrand((String)value.get("brand"));
-                specification.setModel((String)value.get("model"));
-                specificationList.add(specification);
-            }
-            attributes.put(key, specificationList);
-        }
+        //jsonArray = jsonObject.get("shafts");
+        //shafts = parseJson(jsonArray, 0);
+        shafts = new HashMap<>();
 
+        //From here, what I need is a minor change in the attributes, which lead to new json, one step at a time
+        //There are 7 attrributes, which can be measured as steps! Options come in the end.
+
+        int step = 0;
+        String baseUrl = action + "?" + initAttributes.get("pid") + initAttributes.get("vid") + initAttributes.get("qty")
+                + initAttributes.get("cgid") + initAttributes.get("format") + initAttributes.get("condition") ;
+        for(int i=0; i<attributes.get(step+"").size(); i++) {
+            List<Specification> specList = new ArrayList<>();
+            specList.add(attributes.get((step)+"").get(i));
+            fetchProduct(step, attributes, options, shafts, i, products, baseUrl, specList);
+        }
 
         return products;
+    }
+
+
+    public Map<String, List<Specification>> parseJson(JSONArray jsonArray, int setIndexAsKey) {
+        Map<String, List<Specification>> map = new HashMap<>();
+
+        for( int i=0; i < jsonArray.length(); i++ ){
+            JSONObject object =(JSONObject)jsonArray.get(i);
+            String key = object.has("name") ? object.getString("name") : object.has("displayName") ? object.getString("displayName") : "" ;
+            JSONArray values = (JSONArray)object.get("values");
+            List<Specification> specificationList = new ArrayList<>();
+            for(Object obj : values) {
+                JSONObject value = (JSONObject) obj;
+                Specification specification = new Specification();
+                specification.setName(key);
+                specification.setValues(value.getString("displayValue"));
+                specification.setSourceAttributeId(object.getString("id"));
+                specification.setSourceAttributeValue(value.getString("id"));
+                if(value.has("sku")) specification.setProductId(value.getString("sku"));
+                if(value.has("brand")) specification.setBrand(value.getString("brand"));
+                if(value.has("model")) specification.setModel(value.getString("model"));
+
+                Map<String, String> additional = new HashMap<>();
+                if(value.has("price")) additional.put("price", String.valueOf(value.get("price")));
+                if(value.has("variantPrice")) additional.put("variantPrice", String.valueOf( value.get("variantPrice") ));
+                specification.setAttributes(additional);
+
+                specificationList.add(specification);
+            }
+            key = setIndexAsKey == 1 ? i+"" : key;
+            map.put(key, specificationList);
+        }
+
+        return map;
     }
 
     /*
@@ -250,12 +291,14 @@ public class CallawayGolfClubScrapper extends Scrapper {
         CallawayGolfClubScrapper scrapper = new CallawayGolfClubScrapper();
         //http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html
         //http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductConfigurator-FilteredAttributes?format=json&pid=drivers-great-big-bertha-epic-2017&vid=drivers-great-big-bertha-epic-2017&cgid=drivers&qty=1&condition=BNW&a1509=6340&a44=69&a71=5711&option_2-CEX-166bp9472=14985&option_1661-CEX-166bp9472=7496&option_3-CEX-166bp9472=6098&option_54-CEX-166bp9472=14978%7C98%7C100720%7C5692%7C5693
-        String brandUrl = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017";
-        BrandSpecs brandSpecs =
-                scrapper.getBrandSpecs("http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017");
-        System.out.println(Scrapper.cookies);
-        List<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl);
-        System.out.println(Scrapper.cookies);
+        //String brandUrl = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017";
+        //String brandUrl = "http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html";
+        String brandUrl = "http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html";
+        //BrandSpecs brandSpecs =
+        //        scrapper.getBrandSpecs("http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017");
+        //System.out.println(Scrapper.cookies);
+        Set<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl);
+//        /System.out.println(Scrapper.cookies);
         System.out.println(productSpecs);
     }
 }
