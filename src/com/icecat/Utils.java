@@ -131,7 +131,8 @@ public class Utils {
             bw.write("\"description\",\"" + formatForCSV(brand.getDescription())  + "\"");
             bw.newLine();
             for(Map.Entry<String,String> entry : brand.getFeatures().entrySet()){
-                bw.write("\""+ formatForCSV(entry.getKey())+"\",\"" + formatForCSV(entry.getValue())  + "\"");
+                bw.write("\""+ formatForCSV(entry.getKey())+"\",\"" + formatForCSV(entry.getValue())  + "\"," +
+                        "\"" +  formatForCSV( brand.getFeatureImages().get(entry.getKey())) + "\"" );
                 bw.newLine();
             }
             bw.close();

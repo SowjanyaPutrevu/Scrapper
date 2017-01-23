@@ -17,6 +17,8 @@ public class BrandSpecs {
 
     private Map<String,String> features;
 
+    private Map<String, String> featureImages;
+
     private Map<String, List<Specification>> modelSpecs;
 
     private Map<String, List<Specification>> generalSpecs;
@@ -67,6 +69,14 @@ public class BrandSpecs {
 
     public void setFeatures(Map<String, String> features) {
         this.features = features;
+    }
+
+    public Map<String, String> getFeatureImages() {
+        return featureImages;
+    }
+
+    public void setFeatureImages(Map<String, String> featureImages) {
+        this.featureImages = featureImages;
     }
 
     @Override

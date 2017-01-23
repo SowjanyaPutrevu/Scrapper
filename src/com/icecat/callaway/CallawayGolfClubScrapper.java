@@ -67,16 +67,26 @@ public class CallawayGolfClubScrapper extends Scrapper {
         Element description = brandDocument.getElementById(Constants.BRAND_DESCRIPTION_ID);
         if(description != null)
             brandSpecs.setDescription(description.text());
+
         Map<String,String> fdescription = new HashMap<>();
+        Map<String, String> fImages     = new HashMap<>();
+
         Elements tags = brandDocument.getElementsByClass("product-technology-feature-text");
+        Elements tagImages = brandDocument.getElementsByClass("product-technology-feature-img");
+
+        int j = 0;
         for(Element element : tags){
            Elements feature =  element.getElementsByTag("h2");
            String ftext = feature.text();
-           Elements details = element.getElementsByTag("p");
-           String dtext = details.text();
+           feature.remove();
+           String dtext = element.text();
            fdescription.put(ftext,dtext);
+           Elements feImgs = tagImages.get(j).getElementsByTag("img");
+           fImages.put(ftext, feImgs.get(0).attr("src"));
+           j++;
         }
         brandSpecs.setFeatures(fdescription);
+        brandSpecs.setFeatureImages(fImages);
 
         String specsUrl = getSpecsUrl(brandUrl);
         String specsHtml = get_html(specsUrl);
@@ -337,7 +347,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
             String filePath = "C:\\Users\\Sowjanya\\Documents\\Callaway Clubs";
             Utils.writeFile(brandSpecs, filePath);
             //Step 3: get Product Specs
-            Set<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl, true, filePath);
+            //Set<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl, true, filePath);
         }
     }
 }
