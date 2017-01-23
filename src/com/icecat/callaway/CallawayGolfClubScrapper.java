@@ -64,6 +64,10 @@ public class CallawayGolfClubScrapper extends Scrapper {
             brandSpecs.setImagesList(images);
         }
 
+        Element description = brandDocument.getElementById(Constants.BRAND_DESCRIPTION_ID);
+        if(description != null)
+            brandSpecs.setDescription(description.text());
+
         String specsUrl = getSpecsUrl(brandUrl);
         String specsHtml = get_html(specsUrl);
         Document specsDocument = parse_html(specsHtml);
@@ -315,7 +319,8 @@ public class CallawayGolfClubScrapper extends Scrapper {
         CallawayGolfClubScrapper scrapper = new CallawayGolfClubScrapper();
         //Step1 - get Brand Urls
         //List<String> brandUrls =  scrapper.getBrandUrls();
-        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html","http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html","http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"};
+        //,"http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html","http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"
+        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"};
         for(String brandUrl : brandUrls) {
             //Step 2: get Brand Specs
             BrandSpecs brandSpecs = scrapper.getBrandSpecs(brandUrl);
