@@ -130,6 +130,10 @@ public class Utils {
             bw.newLine();
             bw.write("\"description\",\"" + formatForCSV(brand.getDescription())  + "\"");
             bw.newLine();
+            for(Map.Entry<String,String> entry : brand.getFeatures().entrySet()){
+                bw.write("\""+ formatForCSV(entry.getKey())+"\",\"" + formatForCSV(entry.getValue())  + "\"");
+                bw.newLine();
+            }
             bw.close();
 
             Map<String,List<Specification>> generalSpecs = brand.getGeneralSpecs();

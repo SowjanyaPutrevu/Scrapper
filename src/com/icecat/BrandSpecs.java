@@ -15,6 +15,8 @@ public class BrandSpecs {
 
     private String name;
 
+    private Map<String,String> features;
+
     private Map<String, List<Specification>> modelSpecs;
 
     private Map<String, List<Specification>> generalSpecs;
@@ -57,6 +59,14 @@ public class BrandSpecs {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Map<String, String> getFeatures() {
+        return features;
+    }
+
+    public void setFeatures(Map<String, String> features) {
+        this.features = features;
     }
 
     @Override

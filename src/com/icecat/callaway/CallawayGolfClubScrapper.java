@@ -67,6 +67,16 @@ public class CallawayGolfClubScrapper extends Scrapper {
         Element description = brandDocument.getElementById(Constants.BRAND_DESCRIPTION_ID);
         if(description != null)
             brandSpecs.setDescription(description.text());
+        Map<String,String> fdescription = new HashMap<>();
+        Elements tags = brandDocument.getElementsByClass("product-technology-feature-text");
+        for(Element element : tags){
+           Elements feature =  element.getElementsByTag("h2");
+           String ftext = feature.text();
+           Elements details = element.getElementsByTag("p");
+           String dtext = details.text();
+           fdescription.put(ftext,dtext);
+        }
+        brandSpecs.setFeatures(fdescription);
 
         String specsUrl = getSpecsUrl(brandUrl);
         String specsHtml = get_html(specsUrl);
