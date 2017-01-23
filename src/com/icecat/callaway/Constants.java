@@ -24,5 +24,5 @@ class Constants {
     static final String CART_PRICE_SUBTOTAL = "itemPriceSubtotal";
     static final String BRAND_PRODUCT_CONFIG_FORM_ID = "product-configurator-ajax-form";
 
-
+    static final String BALL_CATEGORY_URL = "http://www.callawaygolf.com/golf-balls/?sz=12&start=%data%&format=page-element";
 }

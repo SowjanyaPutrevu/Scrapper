@@ -1,7 +1,9 @@
 package com.icecat.callaway;
+import java.io.*;
 import java.util.*;
 
 import com.icecat.*;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.nodes.Document;
@@ -37,28 +39,36 @@ public class CallawayGolfClubScrapper extends Scrapper {
         return Utils.getImageUrls(images);
     }
 
-    private String getSpecsUrl(String brandUrl) {
+    private String getBrandName(String brandUrl) {
         String[] tokens = brandUrl.split("/");
-        String name = tokens[tokens.length - 1].replace(".html","");
-        return Constants.PRODUCT_SPECS_URL.replace("%data%", name );
+        return tokens[tokens.length - 1].replace(".html","");
+    }
+
+    private String getSpecsUrl(String brandUrl) {
+        return Constants.PRODUCT_SPECS_URL.replace("%data%", getBrandName(brandUrl) );
     }
 
     public BrandSpecs getBrandSpecs(String brandUrl){
-        String specsUrl = getSpecsUrl(brandUrl);
-        String brandHtml = get_html(specsUrl);
-        Document document = parse_html(brandHtml);
-        return getBrandSpecs(document);
+        String brandName = getBrandName(brandUrl);
+        return getBrandSpecs(brandUrl, brandName);
     }
 
-    private BrandSpecs getBrandSpecs(Document brandDocument){
+    private BrandSpecs getBrandSpecs(String brandUrl, String brandName){
         BrandSpecs brandSpecs = new BrandSpecs();
+        brandSpecs.setName(brandName);
+
+        Document brandDocument = parse_html(get_html(brandUrl));
         List<String> images = getBrandImages(brandDocument);
 
         if(images!=null && !images.isEmpty()){
             brandSpecs.setImagesList(images);
         }
 
-        Elements titles = brandDocument.getElementsByClass(Constants.BRAND_SPECS_TITLE_CLASS);
+        String specsUrl = getSpecsUrl(brandUrl);
+        String specsHtml = get_html(specsUrl);
+        Document specsDocument = parse_html(specsHtml);
+
+        Elements titles = specsDocument.getElementsByClass(Constants.BRAND_SPECS_TITLE_CLASS);
         boolean secondGenderPresent = titles.size() > 1;
         Element firstGender = titles.first();
 
@@ -131,15 +141,16 @@ public class CallawayGolfClubScrapper extends Scrapper {
         return skuList;
     }
 
-    public Set<ProductSpecs> getProducts(String brandUrl){
+    public Set<ProductSpecs> getProducts(String brandUrl, boolean writeToFile, String filePath){
         String html = get_html(brandUrl);
         Document document = parse_html(html);
-        return getProducts(document);
+        String brandName = getBrandName(brandUrl);
+        return getProducts(document, writeToFile, filePath, brandName);
     }
 
-    private void fetchProduct(int step, Map<String, List<Specification>> attributes, Map<String, List<Specification>> options,
+    private void fetchProduct(String brandName, int step, Map<String, List<Specification>> attributes, Map<String, List<Specification>> options,
                               Map<String, List<Specification>> shafts, int attributeValueIndex, Set<ProductSpecs> products,
-                              String baseUrl, List<Specification> specList){
+                              String baseUrl, List<Specification> specList, boolean writeToFile, String filePath){
         //Here step indicates current attribute, we are changing with the attributeValueIndex.
         //So, we will increment the steps until we reach 7, where we add products. -- These are standard products
         //Also ignoring options at this point
@@ -152,21 +163,25 @@ public class CallawayGolfClubScrapper extends Scrapper {
         options  = parseJson( object.getJSONArray("options"), 0 );
         if( step == attributes.size() - 1 ) {
             ProductSpecs product = new ProductSpecs();
+            product.setBrand(brandName);
             product.setSpecifications(specList);
             Specification spec = specList.get(step);
             product.setPrice(spec.getAttributes().get("variantPrice"));
             product.setSourceId(spec.getProductId());
             products.add(product);
+            if(writeToFile){
+               Utils.writeFile(product, filePath);
+            }
         } else {
             for( int i=0; i< attributes.get(""+ (step+1)).size(); i++ ) {
                 List<Specification> newList = new ArrayList<>(specList);
                 newList.add(attributes.get((step+1)+"").get(i));
-                fetchProduct(step+1, attributes, options, shafts, i, products, baseUrl, newList );
+                fetchProduct(brandName, step+1, attributes, options, shafts, i, products, baseUrl, newList, writeToFile, filePath );
             }
         }
     }
 
-    public Set<ProductSpecs> getProducts(Document brandDocument){
+    public Set<ProductSpecs> getProducts(Document brandDocument, boolean writeToFile, String filePath,  String brandName){
         Set<ProductSpecs> products = new HashSet<>();
 
         //http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductConfigurator-FilteredAttributes?format=json&pid=drivers-great-big-bertha-epic-2017&vid=drivers-great-big-bertha-epic-2017&cgid=drivers&qty=1&condition=BNW
@@ -213,7 +228,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
         for(int i=0; i<attributes.get(step+"").size(); i++) {
             List<Specification> specList = new ArrayList<>();
             specList.add(attributes.get((step)+"").get(i));
-            fetchProduct(step, attributes, options, shafts, i, products, baseUrl, specList);
+            fetchProduct(brandName, step, attributes, options, shafts, i, products, baseUrl, specList, writeToFile, filePath);
         }
 
         return products;
@@ -300,14 +315,14 @@ public class CallawayGolfClubScrapper extends Scrapper {
         CallawayGolfClubScrapper scrapper = new CallawayGolfClubScrapper();
         //Step1 - get Brand Urls
         //List<String> brandUrls =  scrapper.getBrandUrls();
-        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html","http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"};
+        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html","http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html","http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"};
         for(String brandUrl : brandUrls) {
             //Step 2: get Brand Specs
             BrandSpecs brandSpecs = scrapper.getBrandSpecs(brandUrl);
+            String filePath = "C:\\Users\\Sowjanya\\Documents\\Callaway Clubs";
+            Utils.writeFile(brandSpecs, filePath);
             //Step 3: get Product Specs
-            Set<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl);
-
-            //TODO write to file
+            Set<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl, true, filePath);
         }
     }
 }

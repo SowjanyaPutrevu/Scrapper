@@ -17,7 +17,7 @@ import org.jsoup.nodes.Document;
 /*
     Database:
         Category:
-        Subcategory:
+        Sub-category:
         Company -> specs_website, ...,company,
         Product -> src product id, company, icecat_product_id
  */
@@ -38,7 +38,7 @@ public abstract class Scrapper {
             conn.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36");
             if (cookies!=null && !cookies.isEmpty()) conn.setRequestProperty("Cookie", cookies);
 
-            System.out.println("Request URL ... " + site);
+            //System.out.println("Request URL ... " + site);
 
 
             boolean redirect = false;
@@ -54,7 +54,7 @@ public abstract class Scrapper {
             if (cookies!=null && !cookies.isEmpty()) cookies += ";" + conn.getHeaderField("Set-Cookie");
             else cookies = conn.getHeaderField("Set-Cookie");
 
-            System.out.println("Response Code ... " + status);
+           // System.out.println("Response Code ... " + status);
 
             while (redirect) {
 
@@ -64,14 +64,14 @@ public abstract class Scrapper {
                 // get the cookie if need, for login
                 cookies = conn.getHeaderField("Set-Cookie");
 
-                // open the new connnection again
+                // open the new connection again
                 conn = (HttpURLConnection) new URL(newUrl).openConnection();
                 conn.setRequestProperty("Cookie", cookies);
                 conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
                 conn.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36");
-                //conn.addRequestProperty("Referer", "google.com");
+                //conn.addRequestProperty("Referrer", "google.com");
 
-                System.out.println("Redirect to URL : " + newUrl);
+                //System.out.println("Redirect to URL : " + newUrl);
 
                 status = conn.getResponseCode();
                 if (status != HttpURLConnection.HTTP_OK) {
