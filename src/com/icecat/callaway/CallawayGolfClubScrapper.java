@@ -205,7 +205,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
             product.setPrice(spec.getAttributes().get("variantPrice"));
             product.setSourceId(spec.getProductId());
 
-            JSONObject shafts = object.getJSONObject("shaft");
+            JSONObject shafts = object.getJSONObject("shafts");
             if ( shafts.has("origin") ) {
                 JSONArray origin = shafts.getJSONArray("origin");
                 for(int i = 0; i < origin.length(); i++){
@@ -417,26 +417,6 @@ public class CallawayGolfClubScrapper extends Scrapper {
         return productSpecs;
     }
 
-    public static void main(String[] args) throws Exception {
-        //String brandUrl = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017";
-        //BrandSpecs brandSpecs =
-        //        scrapper.getBrandSpecs("http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017");
-        //System.out.println(Scrapper.cookies);
-//      String brandUrl = "http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html";
-
-        CallawayGolfClubScrapper scrapper = new CallawayGolfClubScrapper();
-        //Step1 - get Brand Urls
-       // List<String> brandUrls =  scrapper.getBrandUrls();
-        //,"http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html","http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"
-        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"};
-        ExecutorService executor = Executors.newFixedThreadPool(15);
-        for( String brandUrl : brandUrls) {
-            executor.execute(new WorkerThread(scrapper, brandUrl));
-        }
-        executor.shutdown();
-        while (!executor.isTerminated()) { System.out.println("Waiting for the threads to finish tasks!"); Thread.sleep(60000);  };
-    }
-
     public static class WorkerThread implements  Runnable{
 
         CallawayGolfClubScrapper scrapper;
@@ -450,12 +430,15 @@ public class CallawayGolfClubScrapper extends Scrapper {
         @Override
         public void run() {
             try {
+                String brandName = scrapper.getBrandName(brandUrl);
                 //Step 2: get Brand Specs
-                // BrandSpecs brandSpecs = scrapper.getBrandSpecs(brandUrl);
-                String filePath = "C:\\Users\\Sowjanya\\Documents\\Callaway Clubs\\Test";
-                // Utils.writeFile(brandSpecs, filePath);
+                BrandSpecs brandSpecs = scrapper.getBrandSpecs(brandUrl);
+                String filePath = "C:\\Users\\Sowjanya\\Documents\\Callaway Clubs" + File.separator + brandName;
+                File f =  new File(filePath );
+                f.mkdir();
+                Utils.writeFile(brandSpecs, filePath);
                 //Step 3: get Product Specs
-                filePath = filePath + File.separator + scrapper.getBrandName(brandUrl) + "-productList.csv";
+                filePath = filePath + File.separator + brandName + "-productList.csv";
                 BufferedWriter bw = new BufferedWriter(new FileWriter(filePath));
                 bw.write("\"images\", " + "\"name\"," + "\"model\"," + "\"brand\"," + "\"description\"," + "\"sku\"," + "\"price\"," + "\"gender\"," + "\"hand\"," + "\"loft\"," + "\"shaft origin\"," + "\"shaft type\"," + "\"shaft manufacturer\"," + "\"shaft material\"," + "\"shaft flex\"," + "\"grip\"," + "\"wraps\"," + "\"length\"," + "\"lie angle\",");
                 bw.newLine();
@@ -468,5 +451,25 @@ public class CallawayGolfClubScrapper extends Scrapper {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        //String brandUrl = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017";
+        //BrandSpecs brandSpecs =
+        //        scrapper.getBrandSpecs("http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017");
+        //System.out.println(Scrapper.cookies);
+//      String brandUrl = "http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html";
+
+        CallawayGolfClubScrapper scrapper = new CallawayGolfClubScrapper();
+        //Step1 - get Brand Urls
+        // List<String> brandUrls =  scrapper.getBrandUrls();
+        //,"http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html","http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"
+        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"};
+        ExecutorService executor = Executors.newFixedThreadPool(15);
+        for( String brandUrl : brandUrls) {
+            executor.execute(new WorkerThread(scrapper, brandUrl));
+        }
+        executor.shutdown();
+        while (!executor.isTerminated()) { System.out.println("Waiting for the threads to finish tasks!"); Thread.sleep(60000);  };
     }
 }

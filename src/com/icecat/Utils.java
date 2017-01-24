@@ -121,7 +121,7 @@ public class Utils {
             return;
         }
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(filePath + File.separator + "Test" + File.separator + brand.getName() + ".csv"));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(filePath + File.separator + brand.getName() + ".csv"));
             bw.write("\"key\",\"value\"");
             bw.newLine();
             String imagesList = "";
@@ -131,41 +131,78 @@ public class Utils {
                 }
             }
             bw.write("\"images\", " + imagesList);
+            bw.newLine();
             bw.write("\"name\",\"" + formatForCSV(brand.getName()) + "\"");
+            bw.newLine();
             bw.write("\"description\",\"" + formatForCSV(brand.getDescription()) + "\"");
+            bw.newLine();
+            int i = 1;
             for (Map.Entry<String, String> entry : brand.getFeatures().entrySet()) {
-                bw.write("\"" + formatForCSV(entry.getKey()) + "\",\"" + formatForCSV(entry.getValue()) + "\"," +
+                bw.write("rtb"+ i + ",\"" + formatForCSV(entry.getKey()) + "\",\"" + formatForCSV(entry.getValue()) + "\"," +
                         "\"" + formatForCSV(brand.getFeatureImages().get(entry.getKey())) + "\"");
+                bw.newLine();
+                i++;
             }
             bw.close();
-
+/*
+Model
+Loft
+Availability
+Standard Length
+Lie
+CC
+Swing Weight
+ */
             Map<String, List<Specification>> generalSpecs = brand.getGeneralSpecs();
             if (generalSpecs != null) {
+                bw = new BufferedWriter(new FileWriter(filePath + File.separator + brand.getName() + "_standard.csv"));
                 for (Map.Entry<String, List<Specification>> entry : generalSpecs.entrySet()) {
-                    bw = new BufferedWriter(new FileWriter(filePath + File.separator + "Test" + File.separator + brand.getName() + "_ " + entry.getKey() + ".csv"));
                     if (entry.getValue() != null) {
+                        Map<String, String> map = new HashMap<>();
                         for (Specification spec : entry.getValue()) {
-                            bw.write("\"" + formatForCSV(spec.getName()) + "\", \"" + formatForCSV(spec.getValues()) + "\"");
-                            bw.newLine();
+                            map.put(spec.getName(), spec.getValues());
                         }
+                        bw.write(
+                                "\"" + formatForCSV( entry.getKey().split(" ")[0] ) + "\", " +
+                                "\"" + formatForCSV(map.get("Model") ) + "\", " +
+                                "\"" + formatForCSV(map.get("Loft") ) + "\", " +
+                                "\"" + formatForCSV(map.get("Availability") ) + "\", " +
+                                "\"" + formatForCSV(map.get("Standard Length") ) + "\", " +
+                                "\"" + formatForCSV(map.get("Lie" ) ) + "\", " +
+                                "\"" + formatForCSV(map.get("CC") ) + "\", " +
+                                "\"" + formatForCSV(map.get("Swing Weight") ) + "\" "
+                        );
+                        bw.newLine();
                     }
                     bw.flush();
-                    bw.close();
                 }
+                bw.close();
             }
-
+/*
+Manufacturer	Flex	Shaft Weight	Torque	Kickpoint
+ */
             generalSpecs = brand.getModelSpecs();
             if (generalSpecs != null) {
+                bw = new BufferedWriter(new FileWriter(filePath + File.separator + brand.getName() + "_manufacturer.csv"));
                 for (Map.Entry<String, List<Specification>> entry : generalSpecs.entrySet()) {
-                    bw = new BufferedWriter(new FileWriter(filePath + File.separator + "Test" + File.separator + brand.getName() + "_ " + entry.getKey() + ".csv"));
                     if (entry.getValue() != null) {
+                        Map<String, String> map = new HashMap<>();
                         for (Specification spec : entry.getValue()) {
-                            bw.write("RTB" + "\", \"" + formatForCSV(spec.getName()) + "\", \"" + formatForCSV(spec.getValues()) + "\"");
+                            map.put(spec.getName(), spec.getValues());
                         }
+                        bw.write(
+                                "\"" + formatForCSV( entry.getKey().split(" ")[0] ) + "\", " +
+                                        "\"" + formatForCSV(map.get("Manufacturer") ) + "\", " +
+                                        "\"" + formatForCSV(map.get("Flex") ) + "\", " +
+                                        "\"" + formatForCSV(map.get("Shaft Weight") ) + "\", " +
+                                        "\"" + formatForCSV(map.get("Torque") ) + "\", " +
+                                        "\"" + formatForCSV(map.get("Kickpoint" ) ) + "\" "
+                        );
+                        bw.newLine();
                     }
                     bw.flush();
-                    bw.close();
                 }
+                bw.close();
             }
         } catch (Exception e) {
             e.printStackTrace();
