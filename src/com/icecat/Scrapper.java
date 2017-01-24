@@ -38,7 +38,7 @@ public abstract class Scrapper {
             conn.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36");
             if (cookies!=null && !cookies.isEmpty()) conn.setRequestProperty("Cookie", cookies);
 
-            //System.out.println("Request URL ... " + site);
+            System.out.println("Request URL ... " + site);
 
 
             boolean redirect = false;

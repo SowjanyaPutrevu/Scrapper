@@ -127,15 +127,24 @@ public class Utils {
             String imagesList = "";
             if (brand.getImagesList() != null) {
                 for (String imageUrl : brand.getImagesList()) {
-                    imagesList += "\"" + imageUrl + "\",";
+
+                    imagesList += "\"" + formatForCSV(imageUrl) + "\",";
                 }
             }
+            String videosList = "";
+            if(brand.getVideos() != null){
+                for(String video : brand.getVideos()) {
+                    videosList += "\"" + formatForCSV(video) + "\"" ;
+                }
+            }
+            bw.newLine();
             bw.write("\"images\", " + imagesList);
             bw.newLine();
             bw.write("\"name\",\"" + formatForCSV(brand.getName()) + "\"");
             bw.newLine();
             bw.write("\"description\",\"" + formatForCSV(brand.getDescription()) + "\"");
             bw.newLine();
+            bw.write("\"video\"," +  videosList );
             int i = 1;
             for (Map.Entry<String, String> entry : brand.getFeatures().entrySet()) {
                 bw.write("rtb"+ i + ",\"" + formatForCSV(entry.getKey()) + "\",\"" + formatForCSV(entry.getValue()) + "\"," +

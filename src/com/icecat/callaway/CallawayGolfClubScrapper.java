@@ -40,7 +40,12 @@ public class CallawayGolfClubScrapper extends Scrapper {
 
     private List<String> getBrandImages(Document document) {
         Elements images = document.getElementsByTag("img");
-        return Utils.getImageUrls(images);
+        Elements productImages = new Elements();
+        for(int i=0; i<images.size(); i++){
+            if(images.get(i).hasClass("rsTmb"))
+                productImages.add(images.get(i));
+        }
+        return Utils.getImageUrls(productImages);
     }
 
     private String getBrandName(String brandUrl) {
@@ -464,7 +469,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
         //Step1 - get Brand Urls
         // List<String> brandUrls =  scrapper.getBrandUrls();
         //,"http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html","http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"
-        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"};
+        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html", "http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"};
         ExecutorService executor = Executors.newFixedThreadPool(15);
         for( String brandUrl : brandUrls) {
             executor.execute(new WorkerThread(scrapper, brandUrl));
