@@ -14,6 +14,7 @@ class Constants {
     static final String FILTER_ATTRIBUTES_URL = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductConfigurator-FilteredAttributes";
     static final String PRODUCT_SPECS_URL = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=%data%";
 
+
     static final String BRAND_SPECS_CLASS = "product-specs-container";
     static final String BRAND_SPECS_TITLE_CLASS = "specsTitle";
     static final String BRAND_SHAFT_SPECS_CLASS = "specsShaftTitle";
@@ -21,6 +22,7 @@ class Constants {
     static final String CART_ITEM_IMAGE_CLASS = "lineItemImage";
     static final String CART_0_ITEM_CLASS = "shipment-0-item-0";
     static final String CART_PRICE_SUBTOTAL = "itemPriceSubtotal";
+    static final String VIDEO_CLASS = "mediaModalView";
 
     static final String BRAND_PRODUCT_CONFIG_FORM_ID = "product-configurator-ajax-form";
     static final String BRAND_DESCRIPTION_ID = "configurator-intro";

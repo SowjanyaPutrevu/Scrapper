@@ -23,6 +23,8 @@ public class BrandSpecs {
 
     private Map<String, List<Specification>> generalSpecs;
 
+    public List<String> videos;
+
     public List<String> getImagesList() {
         return imagesList;
     }
@@ -75,6 +77,14 @@ public class BrandSpecs {
         return featureImages;
     }
 
+    public List<String> getVideos() {
+        return videos;
+    }
+
+    public void setVideos(List<String> videos) {
+        this.videos = videos;
+    }
+
     public void setFeatureImages(Map<String, String> featureImages) {
         this.featureImages = featureImages;
     }
@@ -87,6 +97,7 @@ public class BrandSpecs {
                 ", name='" + name + '\'' +
                 ", modelSpecs=" + modelSpecs +
                 ", generalSpecs=" + generalSpecs +
+                ", videos="+videos+
                 '}';
     }
 }

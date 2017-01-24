@@ -1,6 +1,10 @@
 package com.icecat.callaway;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.icecat.*;
 
@@ -88,6 +92,15 @@ public class CallawayGolfClubScrapper extends Scrapper {
         brandSpecs.setFeatures(fdescription);
         brandSpecs.setFeatureImages(fImages);
 
+        List<String> videos = new ArrayList<>();
+        Elements videoClass = brandDocument.getElementsByClass(Constants.VIDEO_CLASS);
+        for(Element video : videoClass){
+           String videoUrl =  video.attr("data-url");
+            videos.add(videoUrl);
+        }
+        brandSpecs.setVideos(videos);
+
+
         String specsUrl = getSpecsUrl(brandUrl);
         String specsHtml = get_html(specsUrl);
         Document specsDocument = parse_html(specsHtml);
@@ -172,8 +185,8 @@ public class CallawayGolfClubScrapper extends Scrapper {
         return getProducts(document, writeToFile, filePath, brandName);
     }
 
-    private void fetchProduct(String brandName, int step, Map<String, List<Specification>> attributes, Map<String, List<Specification>> options,
-                              Map<String, List<Specification>> shafts, int attributeValueIndex, Set<ProductSpecs> products,
+    private void fetchProduct(String brandName, int step, Map<String, List<Specification>> attributes,
+                                int attributeValueIndex, Set<ProductSpecs> products,
                               String baseUrl, List<Specification> specList, boolean writeToFile, String filePath){
         //Here step indicates current attribute, we are changing with the attributeValueIndex.
         //So, we will increment the steps until we reach 7, where we add products. -- These are standard products
@@ -184,7 +197,6 @@ public class CallawayGolfClubScrapper extends Scrapper {
         String html = get_html(baseUrl);
         JSONObject object = new JSONObject(html);
         attributes = parseJson( object.getJSONArray("attributes"), 1 );
-        options  = parseJson( object.getJSONArray("options"), 0 );
         if( step == attributes.size() - 1 ) {
             ProductSpecs product = new ProductSpecs();
             product.setBrand(brandName);
@@ -192,6 +204,91 @@ public class CallawayGolfClubScrapper extends Scrapper {
             Specification spec = specList.get(step);
             product.setPrice(spec.getAttributes().get("variantPrice"));
             product.setSourceId(spec.getProductId());
+
+            JSONObject shafts = object.getJSONObject("shaft");
+            if ( shafts.has("origin") ) {
+                JSONArray origin = shafts.getJSONArray("origin");
+                for(int i = 0; i < origin.length(); i++){
+                   JSONObject obj = origin.getJSONObject(i);
+                   if(obj.getBoolean("selected")){
+                       Specification sp =new Specification();
+                       sp.setName("Shaft Origin");
+                       sp.setValues(obj.getString("displayValue"));
+                       specList.add(sp);
+                       break;
+                   }
+                }
+            }
+            if ( shafts.has("material") ) {
+                JSONArray origin = shafts.getJSONArray("material");
+                for(int i = 0; i < origin.length(); i++){
+                    JSONObject obj = origin.getJSONObject(i);
+                    if(obj.getBoolean("selected")){
+                        Specification sp =new Specification();
+                        sp.setName("Shaft Material");
+                        sp.setValues(obj.getString("displayValue"));
+                        specList.add(sp);
+                        break;
+                    }
+                }
+            }
+
+            if ( shafts.has("manufacturer") ) {
+                JSONArray origin = shafts.getJSONArray("manufacturer");
+                for(int i = 0; i < origin.length(); i++){
+                    JSONObject obj = origin.getJSONObject(i);
+                    if(obj.getBoolean("selected")){
+                        Specification sp =new Specification();
+                        sp.setName("Shaft Manufacturer");
+                        sp.setValues(obj.getString("displayValue"));
+                        specList.add(sp);
+                        break;
+                    }
+                }
+            }
+
+            if ( shafts.has("type") ) {
+                JSONArray origin = shafts.getJSONArray("type");
+                for(int i = 0; i < origin.length(); i++){
+                    JSONObject obj = origin.getJSONObject(i);
+                    if(obj.getBoolean("selected")){
+                        Specification sp =new Specification();
+                        sp.setName("Shaft Type");
+                        sp.setValues(obj.getString("displayValue"));
+                        specList.add(sp);
+                        break;
+                    }
+                }
+            }
+
+            if ( shafts.has("flex") ) {
+                JSONArray origin = shafts.getJSONArray("flex");
+                for(int i = 0; i < origin.length(); i++){
+                    JSONObject obj = origin.getJSONObject(i);
+                    if(obj.getBoolean("selected")){
+                        Specification sp =new Specification();
+                        sp.setName("Shaft Flex");
+                        sp.setValues(obj.getString("displayValue"));
+                        specList.add(sp);
+                        break;
+                    }
+                }
+            }
+
+
+
+            JSONArray jsonArrayOptions = object.getJSONArray("options");
+            for(Object optionObject : jsonArrayOptions) {
+                JSONObject option = (JSONObject) optionObject;
+                Specification specifcation  = new Specification();
+                specifcation.setName( ((JSONObject) optionObject).getString("displayName") );
+                JSONArray selectedValues =  option.has("selectedValues") ?  option.getJSONArray("selectedValues") : null;
+                if( selectedValues != null && selectedValues.length() > 0 ){
+                    specifcation.setValues( selectedValues.getJSONObject(0).getString("displayValue") );
+                }
+                specList.add(specifcation);
+            }
+
             products.add(product);
             if(writeToFile){
                Utils.writeFile(product, filePath);
@@ -200,12 +297,12 @@ public class CallawayGolfClubScrapper extends Scrapper {
             for( int i=0; i< attributes.get(""+ (step+1)).size(); i++ ) {
                 List<Specification> newList = new ArrayList<>(specList);
                 newList.add(attributes.get((step+1)+"").get(i));
-                fetchProduct(brandName, step+1, attributes, options, shafts, i, products, baseUrl, newList, writeToFile, filePath );
+                fetchProduct(brandName, step+1, attributes, i, products, baseUrl, newList, writeToFile, filePath );
             }
         }
     }
 
-    public Set<ProductSpecs> getProducts(Document brandDocument, boolean writeToFile, String filePath,  String brandName){
+    private Set<ProductSpecs> getProducts(Document brandDocument, boolean writeToFile, String filePath,  String brandName){
         Set<ProductSpecs> products = new HashSet<>();
 
         //http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductConfigurator-FilteredAttributes?format=json&pid=drivers-great-big-bertha-epic-2017&vid=drivers-great-big-bertha-epic-2017&cgid=drivers&qty=1&condition=BNW
@@ -230,18 +327,9 @@ public class CallawayGolfClubScrapper extends Scrapper {
         JSONObject jsonObject = new JSONObject(json);
 
         Map<String, List<Specification>> attributes;
-        Map<String, List<Specification>> options;
-        Map<String, List<Specification>> shafts;
 
         JSONArray jsonArray = jsonObject.getJSONArray("attributes");
         attributes = parseJson(jsonArray, 1);
-
-        jsonArray = jsonObject.getJSONArray("options");
-        options = parseJson(jsonArray, 0);
-
-        //jsonArray = jsonObject.get("shafts");
-        //shafts = parseJson(jsonArray, 0);
-        shafts = new HashMap<>();
 
         //From here, what I need is a minor change in the attributes, which lead to new json, one step at a time
         //There are 7 attrributes, which can be measured as steps! Options come in the end.
@@ -252,14 +340,14 @@ public class CallawayGolfClubScrapper extends Scrapper {
         for(int i=0; i<attributes.get(step+"").size(); i++) {
             List<Specification> specList = new ArrayList<>();
             specList.add(attributes.get((step)+"").get(i));
-            fetchProduct(brandName, step, attributes, options, shafts, i, products, baseUrl, specList, writeToFile, filePath);
+            fetchProduct(brandName, step, attributes, i, products, baseUrl, specList, writeToFile, filePath);
         }
 
         return products;
     }
 
 
-    public Map<String, List<Specification>> parseJson(JSONArray jsonArray, int setIndexAsKey) {
+    private Map<String, List<Specification>> parseJson(JSONArray jsonArray, int setIndexAsKey) {
         Map<String, List<Specification>> map = new HashMap<>();
 
         for( int i=0; i < jsonArray.length(); i++ ){
@@ -329,7 +417,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
         return productSpecs;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         //String brandUrl = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017";
         //BrandSpecs brandSpecs =
         //        scrapper.getBrandSpecs("http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=drivers-great-big-bertha-epic-2017");
@@ -338,16 +426,47 @@ public class CallawayGolfClubScrapper extends Scrapper {
 
         CallawayGolfClubScrapper scrapper = new CallawayGolfClubScrapper();
         //Step1 - get Brand Urls
-        //List<String> brandUrls =  scrapper.getBrandUrls();
+       // List<String> brandUrls =  scrapper.getBrandUrls();
         //,"http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html","http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"
         String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"};
-        for(String brandUrl : brandUrls) {
-            //Step 2: get Brand Specs
-            BrandSpecs brandSpecs = scrapper.getBrandSpecs(brandUrl);
-            String filePath = "C:\\Users\\Sowjanya\\Documents\\Callaway Clubs";
-            Utils.writeFile(brandSpecs, filePath);
-            //Step 3: get Product Specs
-            //Set<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl, true, filePath);
+        ExecutorService executor = Executors.newFixedThreadPool(15);
+        for( String brandUrl : brandUrls) {
+            executor.execute(new WorkerThread(scrapper, brandUrl));
+        }
+        executor.shutdown();
+        while (!executor.isTerminated()) { System.out.println("Waiting for the threads to finish tasks!"); Thread.sleep(60000);  };
+    }
+
+    public static class WorkerThread implements  Runnable{
+
+        CallawayGolfClubScrapper scrapper;
+        String brandUrl;
+
+        public WorkerThread(CallawayGolfClubScrapper scrapper, String brandUrl){
+            this.scrapper = scrapper;
+            this.brandUrl = brandUrl;
+        }
+
+        @Override
+        public void run() {
+            try {
+                //Step 2: get Brand Specs
+                // BrandSpecs brandSpecs = scrapper.getBrandSpecs(brandUrl);
+                String filePath = "C:\\Users\\Sowjanya\\Documents\\Callaway Clubs\\Test";
+                // Utils.writeFile(brandSpecs, filePath);
+                //Step 3: get Product Specs
+                filePath = filePath + File.separator + scrapper.getBrandName(brandUrl) + "-productList.csv";
+                BufferedWriter bw = new BufferedWriter(new FileWriter(filePath));
+                bw.write("\"images\", " + "\"name\"," + "\"model\"," + "\"brand\"," + "\"description\"," + "\"sku\"," + "\"price\"," + "\"gender\"," + "\"hand\"," + "\"loft\"," + "\"shaft origin\"," + "\"shaft type\"," + "\"shaft manufacturer\"," + "\"shaft material\"," + "\"shaft flex\"," + "\"grip\"," + "\"wraps\"," + "\"length\"," + "\"lie angle\",");
+                bw.newLine();
+                bw.close();
+
+                Set<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl, true, filePath);
+                Set<String> skus = scrapper.getSKUs(brandUrl);
+
+            } catch(Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }
