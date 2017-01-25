@@ -1,10 +1,9 @@
 package com.icecat.callaway;
+
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import com.icecat.*;
 
@@ -97,14 +96,25 @@ public class CallawayGolfClubScrapper extends Scrapper {
         brandSpecs.setFeatures(fdescription);
         brandSpecs.setFeatureImages(fImages);
 
-        List<String> videos = new ArrayList<>();
+        Set<String> videos = new HashSet<>();
         Elements videoClass = brandDocument.getElementsByClass(Constants.VIDEO_CLASS);
         for(Element video : videoClass){
            String videoUrl =  video.attr("data-url");
             videos.add(videoUrl);
         }
-        brandSpecs.setVideos(videos);
 
+       List<String> youtube = new ArrayList<>();
+        for(String video:videos) {
+            String html = get_html(video);
+            Document document = parse_html(html);
+            Elements classes = document.getElementsByClass("mk-video-container");
+            for(Element url : classes) {
+                Element iframe = url.getElementsByTag("iframe").first();
+                String videoUrls = iframe.attr("src");
+                youtube.add(videoUrls);
+            }
+        }
+        brandSpecs.setVideos(youtube);
 
         String specsUrl = getSpecsUrl(brandUrl);
         String specsHtml = get_html(specsUrl);
@@ -183,16 +193,23 @@ public class CallawayGolfClubScrapper extends Scrapper {
         return skuList;
     }
 
-    public Set<ProductSpecs> getProducts(String brandUrl, boolean writeToFile, String filePath){
+    /*
+        Manufacturer, i
+        Flex, i
+        Shaft Weight,
+        Torque,
+        Kickpoint
+     */
+    public Set<ProductSpecs> getProducts(String brandUrl, boolean writeToFile, String filePath, Map<String, String> brandConversions){
         String html = get_html(brandUrl);
         Document document = parse_html(html);
         String brandName = getBrandName(brandUrl);
-        return getProducts(document, writeToFile, filePath, brandName);
+        return getProducts(document, writeToFile, filePath, brandName, brandConversions);
     }
 
     private void fetchProduct(String brandName, int step, Map<String, List<Specification>> attributes,
                                 int attributeValueIndex, Set<ProductSpecs> products,
-                              String baseUrl, List<Specification> specList, boolean writeToFile, String filePath){
+                              String baseUrl, List<Specification> specList, boolean writeToFile, String filePath, Map<String, String> brandConversions){
         //Here step indicates current attribute, we are changing with the attributeValueIndex.
         //So, we will increment the steps until we reach 7, where we add products. -- These are standard products
         //Also ignoring options at this point
@@ -295,19 +312,21 @@ public class CallawayGolfClubScrapper extends Scrapper {
             }
 
             products.add(product);
+
+            System.out.println("Fetched a product! " + product.getSourceId());
             if(writeToFile){
-               Utils.writeFile(product, filePath);
+               writeFile(product, filePath, brandConversions);
             }
         } else {
             for( int i=0; i< attributes.get(""+ (step+1)).size(); i++ ) {
                 List<Specification> newList = new ArrayList<>(specList);
                 newList.add(attributes.get((step+1)+"").get(i));
-                fetchProduct(brandName, step+1, attributes, i, products, baseUrl, newList, writeToFile, filePath );
+                fetchProduct(brandName, step+1, attributes, i, products, baseUrl, newList, writeToFile, filePath, brandConversions );
             }
         }
     }
 
-    private Set<ProductSpecs> getProducts(Document brandDocument, boolean writeToFile, String filePath,  String brandName){
+    private Set<ProductSpecs> getProducts(Document brandDocument, boolean writeToFile, String filePath,  String brandName, Map<String, String> brandConversions){
         Set<ProductSpecs> products = new HashSet<>();
 
         //http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductConfigurator-FilteredAttributes?format=json&pid=drivers-great-big-bertha-epic-2017&vid=drivers-great-big-bertha-epic-2017&cgid=drivers&qty=1&condition=BNW
@@ -342,10 +361,10 @@ public class CallawayGolfClubScrapper extends Scrapper {
         int step = 0;
         String baseUrl = action + "?" + initAttributes.get("pid") + initAttributes.get("vid") + initAttributes.get("qty")
                 + initAttributes.get("cgid") + initAttributes.get("format") + initAttributes.get("condition") ;
-        for(int i=0; i<attributes.get(step+"").size(); i++) {
+        for(int i=0; i < attributes.get(step+"").size(); i++) {
             List<Specification> specList = new ArrayList<>();
             specList.add(attributes.get((step)+"").get(i));
-            fetchProduct(brandName, step, attributes, i, products, baseUrl, specList, writeToFile, filePath);
+            fetchProduct(brandName, step, attributes, i, products, baseUrl, specList, writeToFile, filePath, brandConversions);
         }
 
         return products;
@@ -422,6 +441,158 @@ public class CallawayGolfClubScrapper extends Scrapper {
         return productSpecs;
     }
 
+    public static void writeFile(ProductSpecs product, String filePath, Map<String, String> brandConversions) {
+        if (product == null) {
+            System.out.println("Null product passed");
+            return;
+        }
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(filePath , true));
+            String imagesList = "";
+            if (product.getImagesList() != null) {
+                for (String imageUrl : product.getImagesList()) {
+                    imagesList += "\"" + imageUrl + "\",";
+                }
+            }
+            bw.write("\"" + imagesList + "\", \"" +
+                    Utils.formatForCSV(product.getName()) + "\", \"" +
+                    Utils.formatForCSV(product.getModel()) + "\", \"" +
+                    Utils.formatForCSV(product.getBrand()) + "\", \"" +
+                    Utils.formatForCSV(product.getDescription()) + "\", \"" +
+                    Utils.formatForCSV(product.getSourceId()) + "\", \"" +
+                    Utils.formatForCSV(product.getPrice()) + "\",");
+
+            if (product.getSpecifications() != null) {
+                Map<String, String> map = new HashMap<>();
+                for (Specification spec : product.getSpecifications()) {
+                    map.put(spec.getName(), spec.getValues());
+                }
+                String key = map.get("Gender") + "_" + map.get("Shaft Manufacturer") + "_" + map.get("Shaft Flex")+"_";
+                String key_brand = map.get("Gender") + "_" + map.get("Loft") + "_";
+                bw.write("\"" + Utils.formatForCSV(map.get("Gender")) + "\", \"" +
+                        Utils.formatForCSV(map.get("Hand")) + "\", \"" +
+                        Utils.formatForCSV(map.get("Loft")) + "\", \"" +
+                        Utils.formatForCSV(map.get("Shaft Origin")) + "\", \"" +
+                        Utils.formatForCSV(map.get("Shaft Type")) + "\", \"" +
+                        Utils.formatForCSV(map.get("Shaft Manufacturer")) + "\", \"" +
+                        Utils.formatForCSV(map.get("Shaft Material")) + "\", \"" +
+                        Utils.formatForCSV(map.get("Shaft Flex")) + "\", \"" +
+                        brandConversions.get(key+"sw") +  "\", \"" +
+                        brandConversions.get(key+"tq") +  "\", \"" +
+                        brandConversions.get(key+"kp") +  "\", \"" +
+                        Utils.formatForCSV(map.get("Grip")) + "\", \"" +
+                        Utils.formatForCSV(map.get("Wraps")) + "\", \"" +
+                        Utils.formatForCSV(map.get("Length")) + "\", \"" +
+                        Utils.formatForCSV(brandConversions.get(key_brand + "sl")) + "\", \"" +
+                        Utils.formatForCSV(map.get("Lie Angle") ) + "\", \"" +
+                        brandConversions.get(key_brand + "lie") + "\", \"" +
+                        brandConversions.get(key_brand + "sw") + "\", \"" +
+                        brandConversions.get(key_brand + "cc") + "\""
+                ) ;
+            }
+
+            bw.newLine();
+            bw.flush();
+            bw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void writeFile(BrandSpecs brand, String filePath ) {
+        if (brand == null) {
+            System.out.println("Null brand passed");
+            return;
+        }
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(filePath + File.separator + brand.getName() + ".csv"));
+            bw.write("\"key\",\"value\"");
+            bw.newLine();
+            String imagesList = "";
+            if (brand.getImagesList() != null) {
+                for (String imageUrl : brand.getImagesList()) {
+
+                    imagesList += "\"" + Utils.formatForCSV(imageUrl) + "\",";
+                }
+            }
+            String videosList = "";
+            if(brand.getVideos() != null){
+                for(String video : brand.getVideos()) {
+                    videosList += "\"" + Utils.formatForCSV(video) + "\"," ;
+                }
+            }
+            bw.newLine();
+            bw.write("\"images\", " + imagesList);
+            bw.newLine();
+            bw.write("\"name\",\"" + Utils.formatForCSV(brand.getName()) + "\"");
+            bw.newLine();
+            bw.write("\"description\",\"" + Utils.formatForCSV(brand.getDescription()) + "\"");
+            bw.newLine();
+            bw.write("\"video\"," +  videosList );
+            bw.newLine();
+            int i = 1;
+            for (Map.Entry<String, String> entry : brand.getFeatures().entrySet()) {
+                bw.write("rtb"+ i + ",\"" + Utils.formatForCSV(entry.getKey()) + "\",\"" + Utils.formatForCSV(entry.getValue()) + "\"," +
+                        "\"" + Utils.formatForCSV(brand.getFeatureImages().get(entry.getKey())) + "\"");
+                bw.newLine();
+                i++;
+            }
+            bw.close();
+
+            Map<String, List<Specification>> generalSpecs = brand.getGeneralSpecs();
+            if (generalSpecs != null) {
+                bw = new BufferedWriter(new FileWriter(filePath + File.separator + brand.getName() + "_standard.csv"));
+                for (Map.Entry<String, List<Specification>> entry : generalSpecs.entrySet()) {
+                    if (entry.getValue() != null) {
+                        Map<String, String> map = new HashMap<>();
+                        for (Specification spec : entry.getValue()) {
+                            map.put(spec.getName(), spec.getValues());
+                        }
+                        bw.write(
+                                "\"" + Utils.formatForCSV( entry.getKey().split(" ")[0] ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("Model") ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("Loft") ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("Availability") ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("Standard Length") ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("Lie" ) ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("CC") ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("Swing Weight") ) + "\" "
+                        );
+                        bw.newLine();
+                    }
+                    bw.flush();
+                }
+                bw.close();
+            }
+
+            generalSpecs = brand.getModelSpecs();
+            if (generalSpecs != null) {
+                bw = new BufferedWriter(new FileWriter(filePath + File.separator + brand.getName() + "_manufacturer.csv"));
+                for (Map.Entry<String, List<Specification>> entry : generalSpecs.entrySet()) {
+                    if (entry.getValue() != null) {
+                        Map<String, String> map = new HashMap<>();
+                        for (Specification spec : entry.getValue()) {
+                            map.put(spec.getName(), spec.getValues());
+                        }
+                        bw.write(
+                                "\"" + Utils.formatForCSV( entry.getKey().split(" ")[0] ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("Manufacturer") ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("Flex") ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("Shaft Weight") ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("Torque") ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("Kickpoint" ) ) + "\" "
+                        );
+                        bw.newLine();
+                    }
+                    bw.flush();
+                }
+                bw.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static class WorkerThread implements  Runnable{
 
         CallawayGolfClubScrapper scrapper;
@@ -441,17 +612,55 @@ public class CallawayGolfClubScrapper extends Scrapper {
                 String filePath = "C:\\Users\\Sowjanya\\Documents\\Callaway Clubs" + File.separator + brandName;
                 File f =  new File(filePath );
                 f.mkdir();
-                Utils.writeFile(brandSpecs, filePath);
+                writeFile(brandSpecs, filePath);
                 //Step 3: get Product Specs
                 filePath = filePath + File.separator + brandName + "-productList.csv";
                 BufferedWriter bw = new BufferedWriter(new FileWriter(filePath));
-                bw.write("\"images\", " + "\"name\"," + "\"model\"," + "\"brand\"," + "\"description\"," + "\"sku\"," + "\"price\"," + "\"gender\"," + "\"hand\"," + "\"loft\"," + "\"shaft origin\"," + "\"shaft type\"," + "\"shaft manufacturer\"," + "\"shaft material\"," + "\"shaft flex\"," + "\"grip\"," + "\"wraps\"," + "\"length\"," + "\"lie angle\",");
+                bw.write("\"images\", " + "\"name\"," + "\"model\"," + "\"brand\"," + "\"description\"," + "\"sku\","
+                        + "\"price\"," + "\"gender\"," + "\"hand\"," + "\"loft\"," + "\"shaft origin\"," + "\"shaft type\","
+                        + "\"shaft manufacturer\"," + "\"shaft material\"," + "\"shaft flex\","+ "\"shaft weight\","+ "\"torque\","+ "\"kickpoint\","
+                        + "\"grip\"," + "\"wraps\"," + "\"length\"," + "\"standard length\"," + "\"lie angle\"," + "\"lie\"," + "\"swing weight\"," + "\"cc\"");
                 bw.newLine();
                 bw.close();
 
-                Set<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl, true, filePath);
-                Set<String> skus = scrapper.getSKUs(brandUrl);
+                Map<String, String> brandConversions = new HashMap<>();
+                //gender_Manufacturer_flex_shaftw, value
+                //gender_Ma_fx_torque, value
+                //gender_Ma,fx_kicpo, value
+                for(Map.Entry<String, List<Specification>> entry : brandSpecs.getModelSpecs().entrySet()) {
+                    String gender = entry.getKey().toLowerCase().startsWith("wom") ? "Ladies" : "Mens";
+                    List<Specification> specifications = entry.getValue();
+                    Map<String, String> specsMap = new HashMap<>();
+                    for(Specification specification : specifications){
+                        specsMap.put(specification.getName(), specification.getValues());
+                    }
+                    String flex = specsMap.get("Flex").equals("X-Stiff") ? "XStiff" : specsMap.get("Flex");
+                    brandConversions.put(gender+ "_" + specsMap.get("Manufacturer")+"_"+ flex +"_sw", specsMap.get("Shaft Weight") );
+                    brandConversions.put(gender+ "_" + specsMap.get("Manufacturer")+"_"+ flex +"_tq", specsMap.get("Torque") );
+                    brandConversions.put(gender+ "_" + specsMap.get("Manufacturer")+"_"+ flex +"_kp", specsMap.get("Kickpoint") );
+                }
+/*"\"" + Utils.formatForCSV(map.get("Standard Length") ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("Lie" ) ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("CC") ) + "\", " +
+                                        "\"" + Utils.formatForCSV(map.get("Swing Weight") ) + "\" "
 
+ */
+                for(Map.Entry<String, List<Specification>> entry : brandSpecs.getGeneralSpecs().entrySet()) {
+                    String gender = entry.getKey().toLowerCase().startsWith("wom") ? "Ladies" : "Mens";
+                    List<Specification> specifications = entry.getValue();
+                    Map<String, String> specsMap = new HashMap<>();
+                    for(Specification specification : specifications){
+                        specsMap.put(specification.getName(), specification.getValues());
+                    }
+                    brandConversions.put(gender+ "_" + specsMap.get("Model")+"_sl", specsMap.get("Standard Length") );
+                    brandConversions.put(gender+ "_" + specsMap.get("Model")+"_cc", specsMap.get("CC") );
+                    brandConversions.put(gender+ "_" + specsMap.get("Model")+"_sw", specsMap.get("Swing Weight") );
+                    brandConversions.put(gender+ "_" + specsMap.get("Model")+"_lie", specsMap.get("Lie") );
+                }
+                Set<ProductSpecs> productSpecs = scrapper.getProducts(brandUrl, true, filePath, brandConversions);
+                //Set<String> skus = scrapper.getSKUs(brandUrl);
+
+                System.out.println("Finished processing brand: " + brandName + " found " + productSpecs.size() + " products");
             } catch(Exception e) {
                 e.printStackTrace();
             }
@@ -468,8 +677,9 @@ public class CallawayGolfClubScrapper extends Scrapper {
         CallawayGolfClubScrapper scrapper = new CallawayGolfClubScrapper();
         //Step1 - get Brand Urls
         // List<String> brandUrls =  scrapper.getBrandUrls();
+        //"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"
         //,"http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html","http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"
-        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html", "http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"};
+        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"};
         ExecutorService executor = Executors.newFixedThreadPool(15);
         for( String brandUrl : brandUrls) {
             executor.execute(new WorkerThread(scrapper, brandUrl));

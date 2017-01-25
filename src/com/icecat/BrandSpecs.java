@@ -2,6 +2,7 @@ package com.icecat;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Sowji on 21/01/2017.
@@ -77,16 +78,18 @@ public class BrandSpecs {
         return featureImages;
     }
 
+
+
+    public void setFeatureImages(Map<String, String> featureImages) {
+        this.featureImages = featureImages;
+    }
+
     public List<String> getVideos() {
         return videos;
     }
 
     public void setVideos(List<String> videos) {
         this.videos = videos;
-    }
-
-    public void setFeatureImages(Map<String, String> featureImages) {
-        this.featureImages = featureImages;
     }
 
     @Override
