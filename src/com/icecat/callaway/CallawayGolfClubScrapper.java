@@ -454,13 +454,6 @@ public class CallawayGolfClubScrapper extends Scrapper {
                     imagesList += "\"" + imageUrl + "\",";
                 }
             }
-            bw.write("\"" + imagesList + "\", \"" +
-                    Utils.formatForCSV(product.getName()) + "\", \"" +
-                    Utils.formatForCSV(product.getModel()) + "\", \"" +
-                    Utils.formatForCSV(product.getBrand()) + "\", \"" +
-                    Utils.formatForCSV(product.getDescription()) + "\", \"" +
-                    Utils.formatForCSV(product.getSourceId()) + "\", \"" +
-                    Utils.formatForCSV(product.getPrice()) + "\",");
 
             if (product.getSpecifications() != null) {
                 Map<String, String> map = new HashMap<>();
@@ -469,6 +462,15 @@ public class CallawayGolfClubScrapper extends Scrapper {
                 }
                 String key = map.get("Gender") + "_" + map.get("Shaft Manufacturer") + "_" + map.get("Shaft Flex")+"_";
                 String key_brand = map.get("Gender") + "_" + map.get("Loft") + "_";
+
+                bw.write("\"" + imagesList + "\", \"" +
+                        Utils.formatForCSV(product.getBrand() + " " + map.get("Loft") + " " + map.get("Gender") +"/" + map.get("Hand") ) + "\", \"" +
+                        Utils.formatForCSV(product.getModel()) + "\", \"" +
+                        Utils.formatForCSV(product.getBrand()) + "\", \"" +
+                        Utils.formatForCSV(product.getDescription()) + "\", \"" +
+                        Utils.formatForCSV(product.getSourceId()) + "\", \"" +
+                        Utils.formatForCSV(product.getPrice()) + "\",");
+
                 bw.write("\"" + Utils.formatForCSV(map.get("Gender")) + "\", \"" +
                         Utils.formatForCSV(map.get("Hand")) + "\", \"" +
                         Utils.formatForCSV(map.get("Loft")) + "\", \"" +
