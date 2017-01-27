@@ -22,6 +22,8 @@ public class BrandSpecs {
 
     private Map<String, List<Specification>> modelSpecs;
 
+
+
     private Map<String, List<Specification>> generalSpecs;
 
     public List<String> videos;
@@ -77,8 +79,6 @@ public class BrandSpecs {
     public Map<String, String> getFeatureImages() {
         return featureImages;
     }
-
-
 
     public void setFeatureImages(Map<String, String> featureImages) {
         this.featureImages = featureImages;
