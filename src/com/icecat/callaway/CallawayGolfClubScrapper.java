@@ -611,7 +611,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
                 String brandName = scrapper.getBrandName(brandUrl);
                 //Step 2: get Brand Specs
                 BrandSpecs brandSpecs = scrapper.getBrandSpecs(brandUrl);
-                String filePath = "C:\\Users\\Sowjanya\\Documents\\Callaway Clubs" + File.separator + brandName;
+                String filePath = "C:\\Users\\Sowjanya\\Documents\\BigBerthaFusion" + File.separator + brandName;
                 File f =  new File(filePath );
                 f.mkdir();
                 writeFile(brandSpecs, filePath);
@@ -678,10 +678,10 @@ public class CallawayGolfClubScrapper extends Scrapper {
 
         CallawayGolfClubScrapper scrapper = new CallawayGolfClubScrapper();
         //Step1 - get Brand Urls
-        // List<String> brandUrls =  scrapper.getBrandUrls();
+       // List<String> brandUrls =  scrapper.getBrandUrls();
         //"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"
         //,"http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html","http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"
-        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"};
+        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/mens/fairway-woods/fwoods-2016-big-bertha-fusion.html"};
         ExecutorService executor = Executors.newFixedThreadPool(15);
         for( String brandUrl : brandUrls) {
             executor.execute(new WorkerThread(scrapper, brandUrl));

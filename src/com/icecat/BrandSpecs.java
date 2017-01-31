@@ -22,11 +22,13 @@ public class BrandSpecs {
 
     private Map<String, List<Specification>> modelSpecs;
 
-
-
     private Map<String, List<Specification>> generalSpecs;
 
+    private Map<String, List<String>> afeatures;
+
     public List<String> videos;
+
+    public List<String> colors;
 
     public List<String> getImagesList() {
         return imagesList;
@@ -92,6 +94,22 @@ public class BrandSpecs {
         this.videos = videos;
     }
 
+    public Map<String, List<String>> getAfeatures() {
+        return afeatures;
+    }
+
+    public void setAfeatures(Map<String, List<String>> afeatures) {
+        this.afeatures = afeatures;
+    }
+
+    public List<String> getColors() {
+        return colors;
+    }
+
+    public void setColors(List<String> colors) {
+        this.colors = colors;
+    }
+
     @Override
     public String toString() {
         return "BrandSpecs{" +
@@ -101,6 +119,10 @@ public class BrandSpecs {
                 ", modelSpecs=" + modelSpecs +
                 ", generalSpecs=" + generalSpecs +
                 ", videos="+videos+
+                ", afeatures="+afeatures+
+                ", features="+features+
+                ", featureImages="+featureImages+
+                ", colors="+colors+
                 '}';
     }
 }

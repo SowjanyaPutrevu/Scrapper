@@ -21,7 +21,6 @@ public class CallawayGolfBalls extends Scrapper {
 			String url = Constants.BALL_CATEGORY_URL.replace("%data%", start + "");
 			String html = get_html(url);
 			Document document = parse_html(html);
-
 			Elements spans = document.getElementsByTag("a"); //git test
 			if (spans.size() == 0)
 				break;
@@ -33,12 +32,11 @@ public class CallawayGolfBalls extends Scrapper {
 		}
 		return brandUrls;
 	}
-
 	private List<String> getBrandImages(Document document) {
 		Elements images = document.getElementsByTag("img");
 		Elements productImages = new Elements();
-		for (int i = 0; i < images.size(); i++) {
-			if (images.get(i).hasClass("rsTmb"))
+		for(int i=0; i<images.size(); i++){
+			if(images.get(i).hasClass("rsTmb"))
 				productImages.add(images.get(i));
 		}
 		return Utils.getImageUrls(productImages);
@@ -62,7 +60,8 @@ public class CallawayGolfBalls extends Scrapper {
 		BrandSpecs brandSpecs = new BrandSpecs();
 		brandSpecs.setName(brandName);
 
-		Document brandDocument = parse_html(get_html(brandUrl));
+		String brandHtml = get_html(brandUrl);
+		Document brandDocument = parse_html(brandHtml);
 		List<String> images = getBrandImages(brandDocument);
 
 		if (images != null && !images.isEmpty()) {
@@ -157,6 +156,7 @@ public class CallawayGolfBalls extends Scrapper {
 		return skuList;
 
 	}
+
 	public void writeToFile(BrandSpecs brandSpecs,String filePath) {
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(filePath));
@@ -165,7 +165,6 @@ public class CallawayGolfBalls extends Scrapper {
 			String imagesList = "";
 			if (brandSpecs.getImagesList() != null) {
 				for (String imageUrl : brandSpecs.getImagesList()) {
-
 					imagesList += "\"" + Utils.formatForCSV(imageUrl) + "\",";
 				}
 			}
@@ -209,10 +208,14 @@ public class CallawayGolfBalls extends Scrapper {
 		CallawayGolfBalls scrapper = new CallawayGolfBalls();
 
 		String filePath = "C:\\Users\\Sowjanya\\Documents\\Callawayballs";
-		List<String> brandUrls =  scrapper.getBrandUrls();
-		for(int i=0;i<brandUrls.size();i++) {
-			BrandSpecs brandSpecs = scrapper.getBrandSpecs(brandUrls.get(i));
-			scrapper.writeToFile(brandSpecs,filePath+ File.separator+brandSpecs.getName()+".csv");
+		//List<String> brandUrls =  scrapper.getBrandUrls();
+		String[] brandUrls = {"http://www.callawaygolf.com/golf-balls/balls-2017-superhot-70-15pk.html"};
+		//for(int i=0;i<brandUrls.size();i++) {
+		//	BrandSpecs brandSpecs = scrapper.getBrandSpecs(brandUrls.get(i));
+		//	scrapper.writeToFile(brandSpecs,filePath+ File.separator+brandSpecs.getName()+".csv");
+		//}
+		for(String brandUrl : brandUrls){
+			System.out.println(scrapper.getBrandSpecs(brandUrl));
 		}
 	}
 }

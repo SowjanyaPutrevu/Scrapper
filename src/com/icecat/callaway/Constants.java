@@ -13,7 +13,7 @@ class Constants {
     static final String CART_URL = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/Cart-AddProduct?pid=%data%";
     static final String FILTER_ATTRIBUTES_URL = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductConfigurator-FilteredAttributes";
     static final String PRODUCT_SPECS_URL = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=%data%";
-
+    static final String ODESSEY_BASE_URL = "http://de.callawaygolf.com/";
 
     static final String BRAND_SPECS_CLASS = "product-specs-container";
     static final String BRAND_SPECS_TITLE_CLASS = "specsTitle";
@@ -25,10 +25,13 @@ class Constants {
     static final String VIDEO_CLASS = "mediaModalView";
 
     static final String BRAND_PRODUCT_CONFIG_FORM_ID = "product-configurator-ajax-form";
-    static final String BRAND_DESCRIPTION_ID = "configurator-intro";
+    static final String BRAND_DESCRIPTION_ID = "configurator-intro-row";
 
 
     //BALLS
     static final String BALL_CATEGORY_URL = "http://www.callawaygolf.com/golf-balls/?sz=12&start=%data%&format=page-element";
+    static final String ACCESORIES_CATEGORY_URL = "http://www.callawaygolf.com/golf-accessories/?sz=12&start=%data%&format=page-element";
+    static final String A_BRAND_DESCRIPTION_ID = "configurator-intro-row";
+
 
 }
