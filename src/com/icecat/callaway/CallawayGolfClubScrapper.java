@@ -41,10 +41,18 @@ public class CallawayGolfClubScrapper extends Scrapper {
         Elements images = document.getElementsByTag("img");
         Elements productImages = new Elements();
         for(int i=0; i<images.size(); i++){
-            if(images.get(i).hasClass("rsTmb"))
-                productImages.add(images.get(i));
+            if( images.get(i).hasClass("rsTmb"));
+            productImages.add(images.get(i));
         }
         return Utils.getImageUrls(productImages);
+    }
+    private List<String> get3Dview(Document document){
+        Elements urls3d = document.getElementsByClass("product-3D-iframe");
+        Elements view3dUrls = new Elements();
+        for(int i = 0; i<urls3d.size();i++ ){
+            view3dUrls.add(urls3d.get(i));
+        }
+        return Utils.getImageUrls(view3dUrls);
     }
 
     private String getBrandName(String brandUrl) {
@@ -70,6 +78,12 @@ public class CallawayGolfClubScrapper extends Scrapper {
 
         if(images!=null && !images.isEmpty()){
             brandSpecs.setImagesList(images);
+        }
+
+        List<String> threeD = get3Dview(brandDocument);
+
+        if(threeD!=null && !threeD.isEmpty()){
+            brandSpecs.setThreeD(threeD);
         }
 
         Element description = brandDocument.getElementById(Constants.BRAND_DESCRIPTION_ID);
@@ -297,8 +311,6 @@ public class CallawayGolfClubScrapper extends Scrapper {
                 }
             }
 
-
-
             JSONArray jsonArrayOptions = object.getJSONArray("options");
             for(Object optionObject : jsonArrayOptions) {
                 JSONObject option = (JSONObject) optionObject;
@@ -455,6 +467,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
                 }
             }
 
+
             if (product.getSpecifications() != null) {
                 Map<String, String> map = new HashMap<>();
                 for (Specification spec : product.getSpecifications()) {
@@ -513,10 +526,17 @@ public class CallawayGolfClubScrapper extends Scrapper {
             String imagesList = "";
             if (brand.getImagesList() != null) {
                 for (String imageUrl : brand.getImagesList()) {
-
                     imagesList += "\"" + Utils.formatForCSV(imageUrl) + "\",";
                 }
             }
+
+            String threeDList = "";
+            if (brand.getThreeD() != null) {
+                for (String imageUrl : brand.getThreeD()) {
+                    threeDList += "\"" + Utils.formatForCSV(imageUrl) + "\",";
+                }
+            }
+
             String videosList = "";
             if(brand.getVideos() != null){
                 for(String video : brand.getVideos()) {
@@ -525,6 +545,8 @@ public class CallawayGolfClubScrapper extends Scrapper {
             }
             bw.newLine();
             bw.write("\"images\", " + imagesList);
+            bw.newLine();
+            bw.write("\"3DView\", " + threeDList);
             bw.newLine();
             bw.write("\"name\",\"" + Utils.formatForCSV(brand.getName()) + "\"");
             bw.newLine();
@@ -611,7 +633,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
                 String brandName = scrapper.getBrandName(brandUrl);
                 //Step 2: get Brand Specs
                 BrandSpecs brandSpecs = scrapper.getBrandSpecs(brandUrl);
-                String filePath = "C:\\Users\\Sowjanya\\Documents\\BigBerthaFusion" + File.separator + brandName;
+                String filePath = "C:\\Users\\Sowjanya\\Documents\\Callaway Clubs" + File.separator + brandName;
                 File f =  new File(filePath );
                 f.mkdir();
                 writeFile(brandSpecs, filePath);
@@ -681,7 +703,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
        // List<String> brandUrls =  scrapper.getBrandUrls();
         //"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"
         //,"http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html","http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"
-        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/mens/fairway-woods/fwoods-2016-big-bertha-fusion.html"};
+        String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"};
         ExecutorService executor = Executors.newFixedThreadPool(15);
         for( String brandUrl : brandUrls) {
             executor.execute(new WorkerThread(scrapper, brandUrl));

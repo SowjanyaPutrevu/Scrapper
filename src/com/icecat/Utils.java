@@ -23,7 +23,11 @@ public class Utils {
         }
         List<String> imageUrls = new ArrayList<>();
         for (Element image : images) {
-            imageUrls.add(image.attr("src"));
+            String imageUrl = image.attr("src");
+            if(imageUrl.contains("sw=100")){
+               String replacedUrl =  imageUrl.replace("sw=100","sw=500");
+                imageUrls.add(replacedUrl);
+            }
         }
 
         return imageUrls;

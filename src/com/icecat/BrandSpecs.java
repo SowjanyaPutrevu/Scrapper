@@ -30,6 +30,8 @@ public class BrandSpecs {
 
     public List<String> colors;
 
+    public List<String> threeD;
+
     public List<String> getImagesList() {
         return imagesList;
     }
@@ -110,6 +112,14 @@ public class BrandSpecs {
         this.colors = colors;
     }
 
+    public List<String> getThreeD() {
+        return threeD;
+    }
+
+    public void setThreeD(List<String> threeD) {
+        this.threeD = threeD;
+    }
+
     @Override
     public String toString() {
         return "BrandSpecs{" +
@@ -123,6 +133,7 @@ public class BrandSpecs {
                 ", features="+features+
                 ", featureImages="+featureImages+
                 ", colors="+colors+
+                ", 3D view="+threeD+
                 '}';
     }
 }

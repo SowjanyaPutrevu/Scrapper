@@ -27,11 +27,11 @@ class Constants {
     static final String BRAND_PRODUCT_CONFIG_FORM_ID = "product-configurator-ajax-form";
     static final String BRAND_DESCRIPTION_ID = "configurator-intro-row";
 
-
     //BALLS
     static final String BALL_CATEGORY_URL = "http://www.callawaygolf.com/golf-balls/?sz=12&start=%data%&format=page-element";
     static final String ACCESORIES_CATEGORY_URL = "http://www.callawaygolf.com/golf-accessories/?sz=12&start=%data%&format=page-element";
     static final String A_BRAND_DESCRIPTION_ID = "configurator-intro-row";
+    static final String ODESSEY_CATEGORY_URL = "http://de.callawaygolf.com/golf-clubs/?sz=12&start=%data%&format=page-element";
 
 
 }
