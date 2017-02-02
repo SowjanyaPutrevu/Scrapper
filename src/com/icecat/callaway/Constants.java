@@ -14,6 +14,7 @@ class Constants {
     static final String FILTER_ATTRIBUTES_URL = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductConfigurator-FilteredAttributes";
     static final String PRODUCT_SPECS_URL = "http://www.callawaygolf.com/on/demandware.store/Sites-CG-Site/en_US/ProductSpecs-Get?productCode=%data%";
     static final String ODESSEY_BASE_URL = "http://de.callawaygolf.com/";
+    static final String SEARCH_URL = "http://www.callawaygolf.com/search-results/?q=%data%";
 
     static final String BRAND_SPECS_CLASS = "product-specs-container";
     static final String BRAND_SPECS_TITLE_CLASS = "specsTitle";
