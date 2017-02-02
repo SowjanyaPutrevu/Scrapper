@@ -37,27 +37,33 @@ public abstract class Scrapper {
             conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
             conn.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36");
             if (cookies!=null && !cookies.isEmpty()) conn.setRequestProperty("Cookie", cookies);
-
-            //System.out.println("Request URL ... " + site);
-
-
             boolean redirect = false;
-
             // normally, 3xx is redirect
             int status = conn.getResponseCode();
-            if (status != HttpURLConnection.HTTP_OK) {
+
+            int retryCount = 1;
+            while (status != HttpURLConnection.HTTP_OK) {
+                if(retryCount > 4) break;
                 if (status == HttpURLConnection.HTTP_MOVED_TEMP
                         || status == HttpURLConnection.HTTP_MOVED_PERM
-                        || status == HttpURLConnection.HTTP_SEE_OTHER)
+                        || status == HttpURLConnection.HTTP_SEE_OTHER) {
                     redirect = true;
+                    break;
+                } else {
+                    //Will retry 3 times because this does not seem to be right!
+                    Thread.sleep(60000* retryCount);
+                    conn = (HttpURLConnection) obj.openConnection();
+                    conn.setReadTimeout(60000);
+                    conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
+                    conn.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36");
+                    if (cookies!=null && !cookies.isEmpty()) conn.setRequestProperty("Cookie", cookies);
+                    retryCount++;
+                }
             }
             if (cookies!=null && !cookies.isEmpty()) cookies += ";" + conn.getHeaderField("Set-Cookie");
             else cookies = conn.getHeaderField("Set-Cookie");
 
-           // System.out.println("Response Code ... " + status);
-
             while (redirect) {
-
                 // get redirect url from "location" header field
                 String newUrl = conn.getHeaderField("Location");
 

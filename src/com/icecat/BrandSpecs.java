@@ -16,6 +16,8 @@ public class BrandSpecs {
 
     private String name;
 
+    private String brand_name;
+
     private Map<String,String> features;
 
     private Map<String, String> featureImages;
@@ -120,6 +122,14 @@ public class BrandSpecs {
         this.threeD = threeD;
     }
 
+    public String getBrand_name() {
+        return brand_name;
+    }
+
+    public void setBrand_name(String brand_name) {
+        this.brand_name = brand_name;
+    }
+
     @Override
     public String toString() {
         return "BrandSpecs{" +
@@ -134,6 +144,7 @@ public class BrandSpecs {
                 ", featureImages="+featureImages+
                 ", colors="+colors+
                 ", 3D view="+threeD+
+                ", brand-name="+brand_name+
                 '}';
     }
 }

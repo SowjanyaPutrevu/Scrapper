@@ -26,6 +26,20 @@ public class ProductSpecs {
 
     private List<Specification> specifications;
 
+    public BrandSpecs brandSpecs;
+
+
+    //GETTERS AND SETTERE
+
+
+    public BrandSpecs getBrandSpecs() {
+        return brandSpecs;
+    }
+
+    public void setBrandSpecs(BrandSpecs brandSpecs) {
+        this.brandSpecs = brandSpecs;
+    }
+
     public List<String> getImagesList() {
         return imagesList;
     }
@@ -89,6 +103,7 @@ public class ProductSpecs {
     public void setModel(String model) {
         this.model = model;
     }
+
 
     @Override
     public String toString() {

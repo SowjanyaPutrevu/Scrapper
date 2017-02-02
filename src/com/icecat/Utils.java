@@ -27,6 +27,8 @@ public class Utils {
             if(imageUrl.contains("sw=100")){
                String replacedUrl =  imageUrl.replace("sw=100","sw=500");
                 imageUrls.add(replacedUrl);
+            }else{
+                imageUrls.add(imageUrl);
             }
         }
 
