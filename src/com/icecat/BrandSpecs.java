@@ -12,6 +12,27 @@ public class BrandSpecs {
 
     private List<String> imagesList;
 
+    private Set<String> productImages;
+
+    private List<String> specUrl;
+
+    public List<String> getSpecUrl() {
+        return specUrl;
+    }
+
+    public void setSpecUrl(List<String> specUrl) {
+        this.specUrl = specUrl;
+    }
+
+    public Set<String> getProductImages() {
+
+        return productImages;
+    }
+
+    public void setProductImages(Set<String> productImages) {
+        this.productImages = productImages;
+    }
+
     private String description;
 
     private String name;
@@ -19,6 +40,14 @@ public class BrandSpecs {
     private String brand_name;
 
     private Map<String,String> features;
+
+    public String getShortDescription() {
+        return shortDescription;
+    }
+
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
+    }
 
     private Map<String, String> featureImages;
 
@@ -33,6 +62,8 @@ public class BrandSpecs {
     public List<String> colors;
 
     public List<String> threeD;
+
+    public String shortDescription;
 
     public List<String> getImagesList() {
         return imagesList;
@@ -145,6 +176,9 @@ public class BrandSpecs {
                 ", colors="+colors+
                 ", 3D view="+threeD+
                 ", brand-name="+brand_name+
+                ",productImages="+productImages+
+                ",specsUrl="+specUrl+
+                ",shortDescription="+shortDescription+
                 '}';
     }
 }

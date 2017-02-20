@@ -117,15 +117,7 @@ public class OdesseyPutters extends Scrapper {
         }
         brandSpecs.setVideos(youtube);
 
-        List<String> colors = new ArrayList<>();
-        String html = get_html(brandUrl);
-        Document document = parse_html(html);
-        Elements classes = document.getElementsByClass("ajax-input-text");
-        for(Element i : classes){
-            String color = i.outerHtml();
-            colors.add(color);
-        }
-        brandSpecs.setColors(colors);
+
 
         String specsUrl = getSpecsUrl(brandUrl);
         String specsHtml = get_html(specsUrl);

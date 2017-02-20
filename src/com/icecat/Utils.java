@@ -53,7 +53,7 @@ public class Utils {
             int j = 0;
             for (Element td : columns) {
                 Specification specification = new Specification();
-                if (colNames.get(j) == null || colNames.get(j).isEmpty()) {
+                if (j >= colNames.size() || colNames.get(j) == null || colNames.get(j).isEmpty()) {
                     j++;
                     continue;
                 } else {
@@ -70,6 +70,6 @@ public class Utils {
     }
 
     public static String formatForCSV(String string) {
-        return string == null ? "" : string.replace("\"", "");
+        return string == null ? "\"\"" : string.replace("\"", "");
     }
 }

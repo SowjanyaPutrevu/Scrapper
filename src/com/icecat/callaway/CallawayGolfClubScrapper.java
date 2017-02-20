@@ -84,11 +84,11 @@ public class CallawayGolfClubScrapper extends Scrapper {
         }
 
 
-            Elements title = brandDocument.getElementsByTag("h1");
-            for(Element text : title){
-                if(text != null)
+        Elements title = brandDocument.getElementsByTag("h1");
+        for(Element text : title){
+            if(text != null)
                 brandSpecs.setBrand_name(text.text());
-            }
+        }
 
         List<String> threeD = get3Dview(brandDocument);
 
@@ -108,14 +108,14 @@ public class CallawayGolfClubScrapper extends Scrapper {
 
         int j = 0;
         for(Element element : tags){
-           Elements feature =  element.getElementsByTag("h2");
-           String ftext = feature.text();
-           feature.remove();
-           String dtext = element.text();
-           fdescription.put(ftext,dtext);
-           Elements feImgs = tagImages.get(j).getElementsByTag("img");
-           fImages.put(ftext, feImgs.get(0).attr("src"));
-           j++;
+            Elements feature =  element.getElementsByTag("h2");
+            String ftext = feature.text();
+            feature.remove();
+            String dtext = element.text();
+            fdescription.put(ftext,dtext);
+            Elements feImgs = tagImages.get(j).getElementsByTag("img");
+            fImages.put(ftext, feImgs.get(0).attr("src"));
+            j++;
         }
         brandSpecs.setFeatures(fdescription);
         brandSpecs.setFeatureImages(fImages);
@@ -123,11 +123,11 @@ public class CallawayGolfClubScrapper extends Scrapper {
         Set<String> videos = new HashSet<>();
         Elements videoClass = brandDocument.getElementsByClass(Constants.VIDEO_CLASS);
         for(Element video : videoClass){
-           String videoUrl =  video.attr("data-url");
+            String videoUrl =  video.attr("data-url");
             videos.add(videoUrl);
         }
 
-       List<String> youtube = new ArrayList<>();
+        List<String> youtube = new ArrayList<>();
         for(String video:videos) {
             String html = get_html(video);
             Document document = parse_html(html);
@@ -164,30 +164,30 @@ public class CallawayGolfClubScrapper extends Scrapper {
         boolean isModel = false;
 
         for(Element element : specs) {
-                if(secondGenderPresent && secondGender == element){
-                    key = secondGender.text();
-                    isModel = false;
-                } else if( element.hasClass( Constants.BRAND_SHAFT_SPECS_CLASS) ) {
-                    model =  element.text();
-                    isModel = true;
-                } else if( element.hasClass("table-responsive") ) {
-                    List<List<Specification>> tableData = parseTable(element);
-                    int loftIndex = 0;
-                    if(!isModel && tableData!=null && !tableData.isEmpty()){
-                        while(!tableData.get(0).get(loftIndex).getName().equalsIgnoreCase("loft")){
-                            loftIndex++;
-                        }
-                    }
-                    for(List<Specification> row : tableData){
-                        if( !isModel ) {
-                            String k = key+ "_" + row.get(loftIndex).getValues();
-                            generalSpecs.put(k, row);
-                        } else {
-                            String k = key + "_" + model + "_" + row.get(1).getValues();
-                            modelSpecs.put(k, row);
-                        }
+            if(secondGenderPresent && secondGender == element){
+                key = secondGender.text();
+                isModel = false;
+            } else if( element.hasClass( Constants.BRAND_SHAFT_SPECS_CLASS) ) {
+                model =  element.text();
+                isModel = true;
+            } else if( element.hasClass("table-responsive") ) {
+                List<List<Specification>> tableData = parseTable(element);
+                int loftIndex = 0;
+                if(!isModel && tableData!=null && !tableData.isEmpty()){
+                    while(!tableData.get(0).get(loftIndex).getName().equalsIgnoreCase("loft")){
+                        loftIndex++;
                     }
                 }
+                for(List<Specification> row : tableData){
+                    if( !isModel ) {
+                        String k = key+ "_" + row.get(loftIndex).getValues();
+                        generalSpecs.put(k, row);
+                    } else {
+                        String k = key + "_" + model + "_" + row.get(1).getValues();
+                        modelSpecs.put(k, row);
+                    }
+                }
+            }
         }
 
         brandSpecs.setGeneralSpecs(generalSpecs);
@@ -232,7 +232,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
      */
 
     private void fetchProduct(BrandSpecs brandSpecs, int step, Map<String, List<Specification>> attributes,
-                                int attributeValueIndex, Set<ProductSpecs> products,
+                              int attributeValueIndex, Set<ProductSpecs> products,
                               String baseUrl, List<Specification> specList, boolean writeToFile, String filePath, Map<String, String> brandConversions){
         //Here step indicates current attribute, we are changing with the attributeValueIndex.
         //So, we will increment the steps until we reach 7, where we add products. -- These are standard products
@@ -256,22 +256,27 @@ public class CallawayGolfClubScrapper extends Scrapper {
             String brandHtml = get_html(brandUrl.replace("%data%",product.getSourceId()));
             Document document = parse_html(brandHtml);
             Elements tags = document.getElementsByClass("product-title-container");
-            if (tags!= null && !tags.isEmpty())
-               product.setName(tags.first().text());
+            if (tags!= null && !tags.isEmpty()){
+                Elements title = tags.get(0).getElementsByTag("h1");
+                for(Element text : title){
+                    if(text != null)
+                        product.setName(text.text());
+                }
+            }
 
 
             JSONObject shafts = object.getJSONObject("shafts");
             if ( shafts.has("origin") ) {
                 JSONArray origin = shafts.getJSONArray("origin");
                 for(int i = 0; i < origin.length(); i++){
-                   JSONObject obj = origin.getJSONObject(i);
-                   if(obj.getBoolean("selected")){
-                       Specification sp =new Specification();
-                       sp.setName("Shaft Origin");
-                       sp.setValues(obj.getString("displayValue"));
-                       specList.add(sp);
-                       break;
-                   }
+                    JSONObject obj = origin.getJSONObject(i);
+                    if(obj.getBoolean("selected")){
+                        Specification sp =new Specification();
+                        sp.setName("Shaft Origin");
+                        sp.setValues(obj.getString("displayValue"));
+                        specList.add(sp);
+                        break;
+                    }
                 }
             }
             if ( shafts.has("material") ) {
@@ -409,7 +414,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
         int step = 0;
         String baseUrl = action + "?" + initAttributes.get("pid") + initAttributes.get("vid") + initAttributes.get("qty")
                 + initAttributes.get("cgid") + initAttributes.get("format") + initAttributes.get("condition") ;
-        for(int i=0; i < attributes.get(step+"").size(); i++) {
+        for(int i=0; i < attributes.get(step+"").size() ; i++) {
             List<Specification> specList = new ArrayList<>();
             specList.add(attributes.get((step)+"").get(i));
             fetchProduct(brandSpecs, step, attributes, i, products, baseUrl, specList, writeToFile, filePath, brandConversions);
@@ -517,34 +522,34 @@ public class CallawayGolfClubScrapper extends Scrapper {
                 String key = map.get("Gender") + "_" + map.get("Shaft Manufacturer") + "_" + map.get("Shaft Flex")+"_";
                 String key_brand = map.get("Gender") + "_" + loft + "_";
 
-                bw.write("\""+Utils.formatForCSV(product.getSourceId()) + "\", "
+                bw.write("\""+Utils.formatForCSV(product.getSourceId()) + "\","
                         + "\"Callaway\","
-                        + "\""+Utils.formatForCSV(product.getBrandSpecs().getBrand_name()) + "\", "
-                        + "\""+Utils.formatForCSV(product.getName())+ "\", "
+                        + "\""+Utils.formatForCSV(product.getBrandSpecs().getBrand_name()) + "\","
+                        + "\""+Utils.formatForCSV(product.getName())+ "\","
                 );
 
                 int i = 0;
                 //pictures 12
-                 List<String> images = product.getBrandSpecs().getImagesList();
-                 if(images!=null)
-                 for(String image : images){
-                     bw.write("\"" + Utils.formatForCSV(image) + "\",");
-                     i++;
-                     if( i == 12 ) break;
-                 }
-                 while(i<12){
-                     bw.write(",");
-                     i++;
-                 }
+                List<String> images = product.getBrandSpecs().getImagesList();
+                if(images!=null)
+                    for(String image : images){
+                        bw.write("\"" + Utils.formatForCSV(image) + "\",");
+                        i++;
+                        if( i == 12 ) break;
+                    }
+                while(i<12){
+                    bw.write(",");
+                    i++;
+                }
                 //videos 12
                 i=0;
                 List<String> videos = product.getBrandSpecs().getVideos();
                 if(videos != null)
-                for(String video : videos){
-                    bw.write("\"" + Utils.formatForCSV(video) + "\",");
-                    i++;
-                    if( i == 12 ) break;
-                }
+                    for(String video : videos){
+                        bw.write("\"" + Utils.formatForCSV(video) + "\",");
+                        i++;
+                        if( i == 12 ) break;
+                    }
                 while(i<12){
                     bw.write(",");
                     i++;
@@ -552,7 +557,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
                 //3d videos
                 List<String> threeDvideos = product.getBrandSpecs().getThreeD();
                 if( threeDvideos != null && !threeDvideos.isEmpty()) {
-                    bw.write("\"" + threeDvideos.get(0) + "\", ");
+                    bw.write("\"" + threeDvideos.get(0) + "\",");
                 }else{
                     bw.write("\""+"null"+"\",");
                 }
@@ -567,37 +572,37 @@ public class CallawayGolfClubScrapper extends Scrapper {
                 }
 
                 while( i < 6){
-                    bw.write(",,,");
+                    bw.write("\"\",\"\",\"\",");
                     i++;
                 }
 
                 bw.write("\""  +
-                        Utils.formatForCSV(product.getModel()) + "\", \""  +
-                        Utils.formatForCSV(product.getDescription()) + "\", \"" +
+                        Utils.formatForCSV(product.getModel()) + "\",\""  +
+                        Utils.formatForCSV(product.getDescription()) + "\",\"" +
 
                         Utils.formatForCSV(product.getPrice()) + "\",");
 
 
                 //sku,
 
-                bw.write("\"" + Utils.formatForCSV(map.get("Gender")) + "\", \"" +
-                        Utils.formatForCSV(map.get("Hand")) + "\", \"" +
-                        Utils.formatForCSV(loft) + "\", \"" +
-                        Utils.formatForCSV(map.get("Shaft Origin")) + "\", \"" +
-                        Utils.formatForCSV(map.get("Shaft Type")) + "\", \"" +
-                        Utils.formatForCSV(map.get("Shaft Manufacturer")) + "\", \"" +
-                        Utils.formatForCSV(map.get("Shaft Material")) + "\", \"" +
-                        Utils.formatForCSV(map.get("Shaft Flex")) + "\", \"" +
-                        brandConversions.get(key+"sw") +  "\", \"" +
-                        brandConversions.get(key+"tq") +  "\", \"" +
-                        brandConversions.get(key+"kp") +  "\", \"" +
-                        Utils.formatForCSV(map.get("Grip")) + "\", \"" +
-                        Utils.formatForCSV(map.get("Wraps")) + "\", \"" +
-                        Utils.formatForCSV(map.get("Length")) + "\", \"" +
-                        Utils.formatForCSV(brandConversions.get(key_brand + "sl")) + "\", \"" +
-                        Utils.formatForCSV(map.get("Lie Angle") ) + "\", \"" +
-                        brandConversions.get(key_brand + "lie") + "\", \"" +
-                        brandConversions.get(key_brand + "sw") + "\", \"" +
+                bw.write("\"" + Utils.formatForCSV(map.get("Gender")) + "\",\"" +
+                        Utils.formatForCSV(map.get("Hand")) + "\",\"" +
+                        Utils.formatForCSV(loft) + "\",\"" +
+                        Utils.formatForCSV(map.get("Shaft Origin")) + "\",\"" +
+                        Utils.formatForCSV(map.get("Shaft Type")) + "\",\"" +
+                        Utils.formatForCSV(map.get("Shaft Manufacturer")) + "\",\"" +
+                        Utils.formatForCSV(map.get("Shaft Material")) + "\",\"" +
+                        Utils.formatForCSV(map.get("Shaft Flex")) + "\",\"" +
+                        brandConversions.get(key+"sw") +  "\",\"" +
+                        brandConversions.get(key+"tq") +  "\",\"" +
+                        brandConversions.get(key+"kp") +  "\",\"" +
+                        Utils.formatForCSV(map.get("Grip")) + "\",\"" +
+                        Utils.formatForCSV(map.get("Wraps")) + "\",\"" +
+                        Utils.formatForCSV(map.get("Length")) + "\",\"" +
+                        Utils.formatForCSV(brandConversions.get(key_brand + "sl")) + "\",\"" +
+                        Utils.formatForCSV(map.get("Lie Angle") ) + "\",\"" +
+                        brandConversions.get(key_brand + "lie") + "\",\"" +
+                        brandConversions.get(key_brand + "sw") + "\",\"" +
                         brandConversions.get(key_brand + "cc") + "\""
                 ) ;
             }
@@ -695,12 +700,12 @@ public class CallawayGolfClubScrapper extends Scrapper {
                             map.put(spec.getName(), spec.getValues());
                         }
                         bw.write(
-                                "\"" + Utils.formatForCSV( entry.getKey().split(" ")[0] ) + "\", " +
-                                        "\"" + Utils.formatForCSV(map.get("Manufacturer") ) + "\", " +
-                                        "\"" + Utils.formatForCSV(map.get("Flex") ) + "\", " +
-                                        "\"" + Utils.formatForCSV(map.get("Shaft Weight") ) + "\", " +
-                                        "\"" + Utils.formatForCSV(map.get("Torque") ) + "\", " +
-                                        "\"" + Utils.formatForCSV(map.get("Kickpoint" ) ) + "\" "
+                                "\"" + Utils.formatForCSV( entry.getKey().split(" ")[0] ) + "\"," +
+                                        "\"" + Utils.formatForCSV(map.get("Manufacturer") ) + "\"," +
+                                        "\"" + Utils.formatForCSV(map.get("Flex") ) + "\"," +
+                                        "\"" + Utils.formatForCSV(map.get("Shaft Weight") ) + "\"," +
+                                        "\"" + Utils.formatForCSV(map.get("Torque") ) + "\"," +
+                                        "\"" + Utils.formatForCSV(map.get("Kickpoint" ) ) + "\""
                         );
                         bw.newLine();
                     }
@@ -734,64 +739,64 @@ public class CallawayGolfClubScrapper extends Scrapper {
                 f.mkdir();
                 writeFile(brandSpecs, filePath);
                 //Step 3: get Product Specs
-                filePath = filePath + File.separator + brandName + "-productList.csv";
+                filePath = filePath + File.separator + brandName + "-productListnew.csv";
                 BufferedWriter bw = new BufferedWriter(new FileWriter(filePath));
                 bw.write("\"sku\","
                         + "\"brand\","
                         + "\"familyName\","
                         + "\"productName\","
-                        + "\"picture 1\", "
-                        + "\"picture 2\", "
-                        + "\"picture 3\", "
-                        + "\"picture 4\", "
-                        + "\"picture 5\", "
-                        + "\"picture 6\", "
-                        + "\"picture 7\", "
-                        + "\"picture 8\", "
-                        + "\"picture 9\", "
-                        + "\"picture 10\", "
-                        + "\"picture 11\", "
-                        + "\"picture 12\", "
-                        + "\"video 1\", "
-                        + "\"video 2\", "
-                        + "\"video 3\", "
-                        + "\"video 4\", "
-                        + "\"video 5\", "
-                        + "\"video 6\", "
-                        + "\"video 7\", "
-                        + "\"video 8\", "
-                        + "\"video 9\", "
-                        + "\"video 10\", "
-                        + "\"video 11\", "
-                        + "\"video 12\", "
+                        + "\"picture 1\","
+                        + "\"picture 2\","
+                        + "\"picture 3\","
+                        + "\"picture 4\","
+                        + "\"picture 5\","
+                        + "\"picture 6\","
+                        + "\"picture 7\","
+                        + "\"picture 8\","
+                        + "\"picture 9\","
+                        + "\"picture 10\","
+                        + "\"picture 11\","
+                        + "\"picture 12\","
+                        + "\"video 1\","
+                        + "\"video 2\","
+                        + "\"video 3\","
+                        + "\"video 4\","
+                        + "\"video 5\","
+                        + "\"video 6\","
+                        + "\"video 7\","
+                        + "\"video 8\","
+                        + "\"video 9\","
+                        + "\"video 10\","
+                        + "\"video 11\","
+                        + "\"video 12\","
                         + "\"3d video 1 \","
-                        + "\"brand description\", "
+                        + "\"brand description\","
 
-                        + "\"rtb title 1\", "
-                        + "\"rtb description 1\", "
-                        + "\"rtb image 1\", "
+                        + "\"rtb title 1\","
+                        + "\"rtb description 1\","
+                        + "\"rtb image 1\","
 
-                        + "\"rtb title 2\", "
-                        + "\"rtb description 2\", "
-                        + "\"rtb image 2\", "
+                        + "\"rtb title 2\","
+                        + "\"rtb description 2\","
+                        + "\"rtb image 2\","
 
-                        + "\"rtb title 3\", "
-                        + "\"rtb description 3\", "
-                        + "\"rtb image 3\", "
+                        + "\"rtb title 3\","
+                        + "\"rtb description 3\","
+                        + "\"rtb image 3\","
 
-                        + "\"rtb title 4\", "
-                        + "\"rtb description 4\", "
-                        + "\"rtb image 4\", "
+                        + "\"rtb title 4\","
+                        + "\"rtb description 4\","
+                        + "\"rtb image 4\","
 
-                        + "\"rtb title 5\", "
-                        + "\"rtb description 5\", "
+                        + "\"rtb title 5\","
+                        + "\"rtb description 5\","
                         + "\"rtb image 5\", "
 
-                        + "\"rtb title 6\", "
-                        + "\"rtb description 6\", "
-                        + "\"rtb image 6\", "
+                        + "\"rtb title 6\","
+                        + "\"rtb description 6\","
+                        + "\"rtb image 6\","
 
-                         + "\"model\"," + "\"description\"," +
+                        + "\"model\"," + "\"description\"," +
                         "\"price\","
                         + "\"gender\"," + "\"hand\"," + "\"loft\"," + "\"shaft origin\"," + "\"shaft type\","
                         + "\"shaft manufacturer\"," + "\"shaft material\"," + "\"shaft flex\","+ "\"shaft weight\","+ "\"torque\","+ "\"kickpoint\","
@@ -819,7 +824,6 @@ public class CallawayGolfClubScrapper extends Scrapper {
                                         "\"" + Utils.formatForCSV(map.get("Lie" ) ) + "\", " +
                                         "\"" + Utils.formatForCSV(map.get("CC") ) + "\", " +
                                         "\"" + Utils.formatForCSV(map.get("Swing Weight") ) + "\" "
-
  */
                 for(Map.Entry<String, List<Specification>> entry : brandSpecs.getGeneralSpecs().entrySet()) {
                     String gender = entry.getKey().toLowerCase().startsWith("wom") ? "Ladies" : "Mens";
@@ -855,7 +859,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
         //List<String> brandUrls =  scrapper.getBrandUrls();
         //"http://www.callawaygolf.com/golf-clubs/drivers-2016-xr.html"
         //,"http://www.callawaygolf.com/golf-clubs/mens/drivers/drivers-great-big-bertha-epic-2017.html","http://www.callawaygolf.com/golf-clubs/fwoods-2016-xr-pro.html"
-       String[] brandUrls = {"http://www.callawaygolf.com/golf-clubs/mens/iron-sets/irons-2016-apex-cf-pro-combo.html"};
+        String[] brandUrls = {""};
         ExecutorService executor = Executors.newFixedThreadPool(15);
         for( String brandUrl : brandUrls) {
             executor.execute(new WorkerThread(scrapper, brandUrl));
