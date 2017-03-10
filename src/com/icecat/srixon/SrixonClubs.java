@@ -1,4 +1,4 @@
-package com.icecat.cleveland;
+package com.icecat.srixon;
 
 import com.icecat.*;
 import org.json.JSONObject;
@@ -14,38 +14,38 @@ import java.util.*;
 /**
  * Created by Sowjanya on 2/17/2017.
  */
-public class Cleveland extends Scrapper {
+public class SrixonClubs extends Scrapper {
 
     private List<String> getProductUrl(){
         List<String> productUrl = new ArrayList<>();
 
-            String url = Constants.CATEGORY_URL;
-            String html = get_html(url);
-            Document document = parse_html(html);
-            Elements elements = document.getElementsByClass(Constants.PRODUCT_CLASS);
-            for (Element element : elements) {
-                String pUrl = element.attr("href");
-                productUrl.add(Constants.BASE_URL + pUrl);
-            }
+        String url = Constants.CATEGORY_URL;
+        String html = get_html(url);
+        Document document = parse_html(html);
+        Elements elements = document.getElementsByClass(Constants.PRODUCT_CLASS);
+        for (Element element : elements) {
+            String pUrl = element.attr("href");
+            productUrl.add(Constants.BASE_URL + pUrl);
+        }
 
 
         /*for(int index = 0 ; index < productUrl.size();index++){
             System.out.println(productUrl.get(index))
         }*/
-       // System.out.println(productUrl.size());
+        // System.out.println(productUrl.size());
         return productUrl;
     }
 
     private String getDescription(Document document ){
         Element element = document.getElementById(Constants.TAB_ID);
         String description = element.getElementsByTag("p").get(0).text();
-       // System.out.println(description);
+        // System.out.println(description);
         return description;
     }
     private String getProductName(Document document){
-       String productName = document.getElementsByTag("h1").get(0).text();
-       //System.out.println(productName);
-       return productName;
+        String productName = document.getElementsByTag("h1").get(0).text();
+        //System.out.println(productName);
+        return productName;
     }
     private String getShortDescription(Document document){
         Element element = document.getElementsByClass("b-short-description").get(0);
@@ -58,10 +58,10 @@ public class Cleveland extends Scrapper {
         List<String> videos = new ArrayList<>();
         Element element = document.getElementById("tab1");
         Elements elements = element.getElementsByTag("iframe");
-            for(Element element1 : elements) {
-                String video = element1.attr("src");
-                videos.add(video);
-            }
+        for(Element element1 : elements) {
+            String video = element1.attr("src");
+            videos.add(video);
+        }
         //System.out.println(videos);
         return videos;
     }
@@ -130,11 +130,11 @@ public class Cleveland extends Scrapper {
             feature.remove();
             String dtext = element.text();
             fdescription.put(ftext,dtext);
-                if(tagImages.size() > j) {
-                    Elements feImgs = tagImages.get(j).getElementsByTag("img");
-                    fImages.put(ftext, feImgs.get(0).attr("src"));
-                    j++;
-                }
+            if(tagImages.size() > j) {
+                Elements feImgs = tagImages.get(j).getElementsByTag("img");
+                fImages.put(ftext, feImgs.get(0).attr("src"));
+                j++;
+            }
         }
         brandSpecs.setFeatures(fdescription);
         brandSpecs.setFeatureImages(fImages);
@@ -153,79 +153,79 @@ public class Cleveland extends Scrapper {
 
         List<List<Specification>> table = parseTable(brandDocument);
 
-            Map<String, List<Specification>> specs = new HashMap<>();
+        Map<String, List<Specification>> specs = new HashMap<>();
 
-            Map<String, Integer> colIndices = new HashMap<>();
-            int k = 0;
-            for (Specification s : table.get(0)) {
-                    colIndices.put(s.getName().toLowerCase(), k);
-                    k++;
+        Map<String, Integer> colIndices = new HashMap<>();
+        int k = 0;
+        for (Specification s : table.get(0)) {
+            colIndices.put(s.getName().toLowerCase(), k);
+            k++;
+        }
+        for (List<Specification> row : table) {
+            if (row.size() < k) {
+                continue;
             }
-            for (List<Specification> row : table) {
-                if (row.size() < k) {
-                        continue;
-                    }
-                String key = "";
-                Integer loft = colIndices.get("loft");
-                Integer design = colIndices.get("design");
-                Integer model = colIndices.get("model");
-                Integer length = colIndices.get("length");
-                Integer lie = colIndices.get("lie");
-                if (model != null && length != null) {
-                    key = row.get(model).getValues() + " " + row.get(length).getValues();
-                } else if (loft != null && design != null) {
-                    key = row.get(loft).getValues() + " " + row.get(design).getValues();
-                } else if (lie != null && length != null) {
-                    key = row.get(lie).getValues() + " " + row.get(loft).getValues();
+            String key = "";
+            Integer loft = colIndices.get("loft");
+            Integer design = colIndices.get("design");
+            Integer model = colIndices.get("model");
+            Integer length = colIndices.get("length");
+            Integer lie = colIndices.get("lie");
+            if (model != null && length != null) {
+                key = row.get(model).getValues() + " " + row.get(length).getValues();
+            } else if (loft != null && design != null) {
+                key = row.get(loft).getValues() + " " + row.get(design).getValues();
+            } else if (lie != null && length != null) {
+                key = row.get(lie).getValues() + " " + row.get(loft).getValues();
+            }
+            if (!key.equals(""))
+                specs.put(key.replace("°", ".0"), row);
+        }
+
+
+
+        brandSpecs.setGeneralSpecs(specs);
+
+
+        Map<String, Map<String, String>> products = new HashMap<>(); // Our data structure for collecting products we fetched along with its specs.
+        Set<String> specIdentifiers = new HashSet<>();
+
+        Elements productVariations = brandDocument.getElementsByClass("js-product-variations");
+        if (productVariations != null) {
+            Elements form = productVariations.first().getElementsByClass("b-attribute");
+            //We have a list of uls which can have multiple values or options
+            //avoid wasteful recursive calls by stopping when we find sku number! :D
+            //if(brandDocument.hasClass("b-swatches-li")) {
+            Elements hands = brandDocument.getElementsByClass("b-swatches-li"); //Hand
+            if (hands.size() > 1) {
+                for (Element hand : hands) {
+                    Element anchor = hand.getElementsByTag("a").first();
+                    String link = anchor.attr("href");
+                    fetchProducts(link, 1, products, specIdentifiers);
                 }
-                if (!key.equals(""))
-                    specs.put(key.replace("°", ".0"), row);
-                }
-
-
-
-            brandSpecs.setGeneralSpecs(specs);
-
-
-            Map<String, Map<String, String>> products = new HashMap<>(); // Our data structure for collecting products we fetched along with its specs.
-            Set<String> specIdentifiers = new HashSet<>();
-
-            Elements productVariations = brandDocument.getElementsByClass("js-product-variations");
-            if (productVariations != null) {
-                Elements form = productVariations.first().getElementsByClass("b-attribute");
-                //We have a list of uls which can have multiple values or options
-                //avoid wasteful recursive calls by stopping when we find sku number! :D
-                //if(brandDocument.hasClass("b-swatches-li")) {
-                Elements hands = brandDocument.getElementsByClass("b-swatches-li"); //Hand
-                if (hands.size() > 1) {
-                    for (Element hand : hands) {
-                        Element anchor = hand.getElementsByTag("a").first();
-                        String link = anchor.attr("href");
-                        fetchProducts(link, 1, products, specIdentifiers);
+            } else {
+                Element field = form.get(1);
+                if (field.hasClass("attribute")) {
+                    //A select field
+                    Elements options = field.getElementsByTag("option");
+                    for (Element option : options) {
+                        fetchProducts(option.attr("value"), 2, products, specIdentifiers);
                     }
                 } else {
-                    Element field = form.get(1);
-                    if (field.hasClass("attribute")) {
-                        //A select field
-                        Elements options = field.getElementsByTag("option");
-                        for (Element option : options) {
-                            fetchProducts(option.attr("value"), 2, products, specIdentifiers);
-                        }
-                    } else {
-                        System.out.println("Got an unknown input field!, not proceeding further");
-                        System.out.println(field);
-                    }
+                    System.out.println("Got an unknown input field!, not proceeding further");
+                    System.out.println(field);
                 }
-
-            } else {
-                //No Product Variations found! :( Reverting to default way.
-                List<String> skus = getSkus();
-                brandSpecs.setSkus(skus);
             }
 
-            if (writeToFile) {
-                writeToFile(brandSpecs, filePath + File.separator + brandSpecs.getBrand_name() + "-new.csv", products, specIdentifiers, colIndices.keySet());
-            }
+        } else {
+            //No Product Variations found! :( Reverting to default way.
+            List<String> skus = getSkus();
+            brandSpecs.setSkus(skus);
+        }
+
+        if (writeToFile) {
+            writeToFile(brandSpecs, filePath + File.separator + brandSpecs.getBrand_name() + "-new.csv", products, specIdentifiers, colIndices.keySet());
+        }
 
 
         return brandSpecs;
@@ -359,7 +359,7 @@ public class Cleveland extends Scrapper {
                 for(String sku : products.keySet()) {
                     bw.write("\"" + Utils.formatForCSV(sku) + "\",");
 
-                    bw.write("\"Cleveland\",");
+                    bw.write("\"Srixon\",");
                     bw.write("\"" + Utils.formatForCSV(brandSpecs.getBrand_name()) + "\",");
 
                     i = 0;
@@ -409,21 +409,21 @@ public class Cleveland extends Scrapper {
 
                     Map<String, String> specMap = products.get(sku);
                     bw.write("\"" + Utils.formatForCSV(specMap.get("hand")) + "\",");
-                        String gSpec = "";
-                        for (String si : sIs) {
-                            bw.write("\"" + Utils.formatForCSV(specMap.get(si)) + "\",");
-                            if (brandSpecs.getGeneralSpecs() != null && gSpec == "") {
-                                Set<String> gSpecs = brandSpecs.getGeneralSpecs().keySet();
-                                for (String s : gSpecs) {
-                                    if (specMap.get(si).contains(s)) {
-                                        gSpec = s;
-                                        break;
-                                    }
+                    String gSpec = "";
+                    for (String si : sIs) {
+                        bw.write("\"" + Utils.formatForCSV(specMap.get(si)) + "\",");
+                        if (brandSpecs.getGeneralSpecs() != null && gSpec == "") {
+                            Set<String> gSpecs = brandSpecs.getGeneralSpecs().keySet();
+                            for (String s : gSpecs) {
+                                if (specMap.get(si).contains(s)) {
+                                    gSpec = s;
+                                    break;
                                 }
                             }
                         }
+                    }
 
-                   if( brandSpecs.getGeneralSpecs() != null ) {
+                    if( brandSpecs.getGeneralSpecs() != null ) {
                         List<Specification> generalSpecs = brandSpecs.getGeneralSpecs().get(gSpec);
                         if(generalSpecs != null) {
                             Map<String, String> conversions = new HashMap<>();
@@ -447,21 +447,21 @@ public class Cleveland extends Scrapper {
     }
 
     public static void main(String[] args) {
-        Cleveland clubs = new Cleveland();
+        SrixonClubs clubs = new SrixonClubs();
 
 
-           // clubs.getProductUrl();
-        String filePath = "C:\\Users\\Sowjanya\\Documents\\ClevelandClubs";
-        clubs.getBrandSpecs("http://www.clevelandgolf.com/en/clubs/womens/wedges/womens-588-rtx-cb-2.0-black-satin/MW588RTXCB2.html",true,filePath );
-      //  clubs.getBrandSpecs("http://www.clevelandgolf.com/en/putters-/tfi-2135-elevado/MTFI2135ELEV.html",true,filePath );
-       //clubs.getSkus();
+        // clubs.getProductUrl();
+        String filePath = "C:\\Users\\Sowjanya\\Documents\\SrixonClubs";
+       // clubs.getBrandSpecs("http://www.clevelandgolf.com/en/clubs/womens/wedges/womens-588-rtx-cb-2.0-black-satin/MW588RTXCB2.html",true,filePath );
+        //  clubs.getBrandSpecs("http://www.clevelandgolf.com/en/putters-/tfi-2135-elevado/MTFI2135ELEV.html",true,filePath );
+        //clubs.getSkus();
 
-        /*List<String> brandUrls =  clubs.getProductUrl();
+        List<String> brandUrls =  clubs.getProductUrl();
        // clubs.getBrandSpecs("http://www.clevelandgolf.com/en/wedges-/588-rtx-2.0-tour-satin/M588RTX2TS.html",true,filePath);
 
        for(int i = brandUrls.size()-1 ; i > 0 ; i--) {
             BrandSpecs brandSpecs = clubs.getBrandSpecs(brandUrls.get(i), true, filePath);
             //clubs.writeToFile(brandSpecs,filePath+ File.separator+brandSpecs.getBrand_name()+".csv");
-        }*/
+        }
     }
 }

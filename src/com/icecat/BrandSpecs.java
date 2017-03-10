@@ -57,13 +57,40 @@ public class BrandSpecs {
 
     private Map<String, List<String>> afeatures;
 
-    public List<String> videos;
+    private List<String> videos;
 
-    public List<String> colors;
+    private List<String> colors;
 
-    public List<String> threeD;
+    private List<String> threeD;
 
-    public String shortDescription;
+    private String shortDescription;
+
+    private List<String> skus;
+
+    public String getAuthorDesc() {
+        return authorDesc;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public void setAuthorDesc(String authorDesc) {
+        this.authorDesc = authorDesc;
+    }
+
+
+    Map<String,String> details ;
+
+    private String authorDesc;
+
+    private String publisher;
+
+
 
     public List<String> getImagesList() {
         return imagesList;
@@ -71,6 +98,14 @@ public class BrandSpecs {
 
     public void setImagesList(List<String> imagesList) {
         this.imagesList = imagesList;
+    }
+
+    public Map<String, String> getDetails() {
+        return details;
+    }
+
+    public void setDetails(Map<String, String> details) {
+        this.details = details;
     }
 
     public String getDescription() {
@@ -161,6 +196,14 @@ public class BrandSpecs {
         this.brand_name = brand_name;
     }
 
+    public List<String> getSkus() {
+        return skus;
+    }
+
+    public void setSkus(List<String> skus) {
+        this.skus = skus;
+    }
+
     @Override
     public String toString() {
         return "BrandSpecs{" +
@@ -179,6 +222,10 @@ public class BrandSpecs {
                 ",productImages="+productImages+
                 ",specsUrl="+specUrl+
                 ",shortDescription="+shortDescription+
+                ",skus="+skus+
+                ",details="+details+
+                ",publisher="+publisher+
+                ",authorDesc="+authorDesc+
                 '}';
     }
 }

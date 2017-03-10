@@ -63,7 +63,7 @@ public class CassedroLibre extends Scrapper {
      }*/
     private List<String> getEnglishBooks(){
         List<String> list = new ArrayList<>();
-        for(int i = 44; i <= 46; i++) {
+        for(int i = 198; i <= 200; i++) {
             String url = Constants.ENGLISH_BOOKS.replace("%data%",i+"");
             String html = get_html(url);
             Document document = parse_html(html);
@@ -82,11 +82,14 @@ public class CassedroLibre extends Scrapper {
         return list;
     }
     private String getTitle(Document document){
-        Element elements = document.getElementsByClass("book-header-2-title").get(0);
-        String title = (elements.text());
-        String[] titleText = title.split("(En papel)");
-        //System.out.println(title);
-        return titleText[0].replace("("," ");
+        String[] titleText = null;
+        Elements elements = document.getElementsByTag("h1");
+        for(Element element : elements) {
+            String title = (element.text());
+            titleText = title.split("(En papel)");
+            //System.out.println(title);
+        }      // return titleText[0].replace("(", " ");
+        return  titleText[0].replace("(", " ");
     }
 
     private String getDescription(Document document) {
@@ -212,7 +215,7 @@ public class CassedroLibre extends Scrapper {
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(filePath));
 
-            for(int index = 0; index < books.getEnglishBooks().size() ;index++) {
+            for(int index = 0 ; index < books.getEnglishBooks().size() ;index++) {
                 String url = books.getEnglishBooks().get(index);
                 //String url = "https://www.casadellibro.com/libro-un-ano-entre-los-persas/mkt0003066624/4306635";
                 BrandSpecs brandSpecs = books.brandSpecs(url);
@@ -317,7 +320,7 @@ public class CassedroLibre extends Scrapper {
         // books.getProductUrl();
         String filePath = "C:\\Users\\Sowjanya\\Documents\\casadellibro";
         // books.brandSpecs(url);
-            books.writeFile(filePath + File.separator + "booksp45-46"+".csv");
+            books.writeFile(filePath + File.separator + "booksp198-200"+".csv");
             //String html = books.get_html(url);
             //Document document = books.parse_html(html);
            //books.getDescription(document);

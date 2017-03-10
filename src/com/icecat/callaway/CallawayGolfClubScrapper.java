@@ -674,14 +674,14 @@ public class CallawayGolfClubScrapper extends Scrapper {
                             map.put(spec.getName(), spec.getValues());
                         }
                         bw.write(
-                                "\"" + Utils.formatForCSV( entry.getKey().split(" ")[0] ) + "\", " +
-                                        "\"" + Utils.formatForCSV(map.get("Model") ) + "\", " +
-                                        "\"" + Utils.formatForCSV(map.get("Loft") ) + "\", " +
-                                        "\"" + Utils.formatForCSV(map.get("Availability") ) + "\", " +
-                                        "\"" + Utils.formatForCSV(map.get("Standard Length") ) + "\", " +
-                                        "\"" + Utils.formatForCSV(map.get("Lie" ) ) + "\", " +
-                                        "\"" + Utils.formatForCSV(map.get("CC") ) + "\", " +
-                                        "\"" + Utils.formatForCSV(map.get("Swing Weight") ) + "\" "
+                                "\"" + Utils.formatForCSV( entry.getKey().split(" ")[0] ) + "\"," +
+                                        "\"" + Utils.formatForCSV(map.get("Model") ) + "\"," +
+                                        "\"" + Utils.formatForCSV(map.get("Loft") ) + "\"," +
+                                        "\"" + Utils.formatForCSV(map.get("Availability") ) + "\"," +
+                                        "\"" + Utils.formatForCSV(map.get("Standard Length") ) + "\"," +
+                                        "\"" + Utils.formatForCSV(map.get("Lie" ) ) + "\"," +
+                                        "\"" + Utils.formatForCSV(map.get("CC") ) + "\"," +
+                                        "\"" + Utils.formatForCSV(map.get("Swing Weight") ) + "\""
                         );
                         bw.newLine();
                     }
