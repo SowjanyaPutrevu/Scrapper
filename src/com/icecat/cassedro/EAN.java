@@ -11,77 +11,32 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Created by Sowjanya on 2/28/2017.
+ * Created by Sowjanya on 3/14/2017.
  */
+public class EAN extends Scrapper {
 
-//To remember should write class names in spanish only for getting spanish results
-public class CassedroLibre extends Scrapper {
-    /*private List<String> getCategory(){
-        List<String> filter = new LinkedList<>();
-        String url = Constants.CATEGORY_URL;
-        String html = get_html(url);
-        Document document = parse_html(html);
-        Element element = document.getElementById("content");
-        Elements elements1 = element.getElementsByClass(Constants.FILTER_CLASS);
-            for(Element element1 : elements1) {
-                String text = element1.text();
-                if (text.equals("Filtrar por temática")) {
-                    Elements fclass = element.getElementsByTag("a");
-                    for(Element element2 : fclass) {
-                        String href = element2.attr("href");
-                        String filterUrl = Constants.BASE_URL+href;
-                            filter.add(filterUrl);
-                    }
-                }
-            }
-       //System.out.println(filter);
-        return filter;
-    }*/
-    //ProductUrls
-    //Per Page 60 results
-    //should manage them till the end of the results.Todo
-
-    /* private List<String> getProductUrl() {
-         List<String> productUrl = new LinkedList<>();
-         //for (int i = 0; i< getCategory().size();i++) {
-             String url = getCategory().get(18);
-             String html = get_html(url);
-             Document document = parse_html(html);
-             Elements h2 = document.getElementsByTag("h2");
-             for(Element element : h2){
-                 Elements tags = element.getElementsByTag("a");
-                 for(Element tag : tags) {
-                     String href = tag.attr("href");
-                     //System.out.println(href);
-                     productUrl.add(Constants.BASE_URL+href);
-                 }
-             }
-         //}
-             System.out.println(productUrl);
-             System.out.println(productUrl.size());
-             return productUrl;
-     }*/
     private List<String> getEnglishBooks(){
         List<String> list = new ArrayList<>();
-        for(int i = 10; i < 25; i++) {
-            String url = Constants.ART_BOOKS.replace("%data%",i+"");
+        for(int i = 0; i < Constants.eans.length; i++) {
+            String url = Constants.SEARCH_URL.replace("%data%",Constants.eans[i]+"");
             String html = get_html(url);
             Document document = parse_html(html);
-            Elements h2 = document.getElementsByTag("h2");
-            for(Element element : h2){
-                Elements tags = element.getElementsByTag("a");
-                for(Element tag : tags) {
-                    String href = tag.attr("href");
-                    //System.out.println(href);
-                    list.add(Constants.BASE_URL+href);
-                }
+            Element h2 = document.getElementsByClass("title-link").get(0);
+            Elements tags = h2.getElementsByTag("a");
+            for(Element tag : tags) {
+                String href = tag.attr("href");
+                //System.out.println(href);
+                list.add(Constants.BASE_URL+href);
             }
-            System.out.println("Fetched a product"+i);
+            if( i%10 == 0 || i == Constants.eans.length - 1  )
+                System.out.println("Fetched url " + i);
         }
+
         //System.out.println(list);
-        //System.out.println(list.size());
+        System.out.println(list.size());
         return list;
     }
+
     private String getTitle(Document document){
         String[] titleText = null;
         Elements elements = document.getElementsByTag("h1");
@@ -197,17 +152,9 @@ public class CassedroLibre extends Scrapper {
             return null;
         }
     }
-   /* private String getCategory(Document document){
-        String text = null;
-        Elements elements = document.getElementsByClass("bread");
-        for(Element element : elements){
-            text = element.text();
-        }
-        return text;
-    }*/
 
     public static void writeFile( String filePath){
-        CassedroLibre books = new CassedroLibre();
+        EAN books = new EAN();
 
         String headers = "\"Title\"," +
                 "\"Author\"," +
@@ -216,8 +163,7 @@ public class CassedroLibre extends Scrapper {
                 "\"Description\"," +
                 "\"Image1\"," +
                 "\"Image2\"," +
-                "\"Image3\"," +
-                "\"Category\",";
+                "\"Image3\"," ;
 
         List<String> extraHeaders = new ArrayList<>();
         Set<String> extraHeaderSet = new HashSet<>();
@@ -226,7 +172,7 @@ public class CassedroLibre extends Scrapper {
             BufferedWriter bw = new BufferedWriter(new FileWriter(filePath));
 
             List<String> bookList = books.getEnglishBooks();
-            for(int index = 0 ; index < bookList.size() ;index++) {
+            for(int index = 0 ; index <  bookList.size() ;index++) {
                 String url = bookList.get(index);
                 //String url = "https://www.casadellibro.com/libro-un-ano-entre-los-persas/mkt0003066624/4306635";
                 BrandSpecs brandSpecs = books.brandSpecs(url);
@@ -234,7 +180,6 @@ public class CassedroLibre extends Scrapper {
                 bw.write("\"" + Utils.formatForCSV(brandSpecs.getBrand_name()) + "\",");
                 bw.write("\"" + Utils.formatForCSV(brandSpecs.getAuthorDesc()) + "\",");
                 bw.write("\"" + Utils.formatForCSV(brandSpecs.getPublisher()) + "\",");
-               // bw.write("\""+Utils.formatForCSV(brandSpecs.getCategory()) + "\",");
                 String description = brandSpecs.getDescription() != null ? brandSpecs.getDescription() : "null";
                 bw.write("\"" + Utils.formatForCSV(description) + "\",");
                 int i = 0;
@@ -262,6 +207,8 @@ public class CassedroLibre extends Scrapper {
                     bw.write( "\"" + Utils.formatForCSV(features.get(key)) + "\",");
                 }
                 bw.newLine();
+
+                System.out.println("Wrote " + index + " product to file");
             }
             bw.flush();
             bw.close();
@@ -322,31 +269,15 @@ public class CassedroLibre extends Scrapper {
         if(publisher != null)
             brandSpecs.setPublisher(publisher);
 
-       /* String category = getCategory(brandDocument);
-        if(category != null)
-            brandSpecs.setCategory(category);*/
-
         System.out.println(brandSpecs);
         return brandSpecs;
     }
 
     public static void main(String[] args) {
-        CassedroLibre books = new CassedroLibre();
-        // books.getProductUrl();
-        String filePath = "C:\\Users\\Sowjanya\\Documents\\casadellibro";
+        EAN ean = new EAN();
+       String filePath = "C:\\Users\\Sowjanya\\Documents\\casadellibro";
         // books.brandSpecs(url);
-        books.writeFile(filePath + File.separator + "Artsp0-100"+".csv");
-        //String html = books.get_html(url);
-        //Document document = books.parse_html(html);
-        //books.getDescription(document);
-        //books.details(document);
-        // books.getAuthor(document);
-        // books.getAuthorDetails(document);
-        // books.getAuthorDesc(document);
-        // books.getPublisher(document);
-        // books.getImageList(document);
-        // }
-        //books.getTitle();
-        //books.getDescription();
+        ean.writeFile(filePath + File.separator + "taskbooks"+".csv");
+        //ean.getEnglishBooks();
     }
 }

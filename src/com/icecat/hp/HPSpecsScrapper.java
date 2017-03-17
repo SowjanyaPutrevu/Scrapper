@@ -48,10 +48,10 @@ public class HPSpecsScrapper  extends   Scrapper{
                 pw.append("\"" + entry.getKey() + "\"");
                 pw.append(',');
                 pw.append("\"" + entry.getValue() + "\"");
-                pw.append("\n");
+                pw.append("");
 
             }
-            pw.append("\n");
+            pw.append("");
             pw.close();
         }
    // }

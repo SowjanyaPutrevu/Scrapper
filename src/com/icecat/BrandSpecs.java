@@ -35,9 +35,19 @@ public class BrandSpecs {
 
     private String description;
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
     private String name;
 
     private String brand_name;
+
+    private String category;
 
     private Map<String,String> features;
 
