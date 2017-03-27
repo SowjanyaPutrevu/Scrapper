@@ -5,6 +5,7 @@ class Constants {
     static final String CATEGORY_URL = "https://www.casadellibro.com/libros";
     static final String FILTER_CLASS = "title03";
     static final String ENGLISH_BOOKS = "https://www.casadellibro.com/libros/literatura/en-otros-idiomas/literatura-en-ingles/121003002/p%data%";
+   // static final String LIBROS_EN_PAPEL = "https://www.casadellibro.com/libros/arte/101000000/p%data%";
     static final String ART_BOOKS = "https://www.casadellibro.com/libros/arte/101000000/p%data%";
     static final String SEARCH_URL = "https://www.casadellibro.com/busqueda-generica?busqueda=%data%&nivel=5&auto=0&maxresultados=-1";
     static final String[] eans = {"9788491091707",

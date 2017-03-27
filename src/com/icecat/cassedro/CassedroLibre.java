@@ -63,7 +63,7 @@ public class CassedroLibre extends Scrapper {
      }*/
     private List<String> getEnglishBooks(){
         List<String> list = new ArrayList<>();
-        for(int i = 10; i < 25; i++) {
+        for(int i = 86; i <= 100; i++) {
             String url = Constants.ART_BOOKS.replace("%data%",i+"");
             String html = get_html(url);
             Document document = parse_html(html);
@@ -145,7 +145,11 @@ public class CassedroLibre extends Scrapper {
         return details;
     }
     private String getAuthor(Document document){
-        String author = document.getElementsByClass("book-header-2-subtitle-author").get(0).text();
+        String author = null;
+        Elements tags = document.getElementsByClass("book-header-2-subtitle-author");
+        for(Element tag : tags){
+            author = tag.text();
+        }
         //System.out.println(author);
         return author;
     }
@@ -234,7 +238,7 @@ public class CassedroLibre extends Scrapper {
                 bw.write("\"" + Utils.formatForCSV(brandSpecs.getBrand_name()) + "\",");
                 bw.write("\"" + Utils.formatForCSV(brandSpecs.getAuthorDesc()) + "\",");
                 bw.write("\"" + Utils.formatForCSV(brandSpecs.getPublisher()) + "\",");
-               // bw.write("\""+Utils.formatForCSV(brandSpecs.getCategory()) + "\",");
+                // bw.write("\""+Utils.formatForCSV(brandSpecs.getCategory()) + "\",");
                 String description = brandSpecs.getDescription() != null ? brandSpecs.getDescription() : "null";
                 bw.write("\"" + Utils.formatForCSV(description) + "\",");
                 int i = 0;
@@ -335,7 +339,7 @@ public class CassedroLibre extends Scrapper {
         // books.getProductUrl();
         String filePath = "C:\\Users\\Sowjanya\\Documents\\casadellibro";
         // books.brandSpecs(url);
-        books.writeFile(filePath + File.separator + "Artsp0-100"+".csv");
+        books.writeFile(filePath + File.separator + "Art86-100"+".csv");
         //String html = books.get_html(url);
         //Document document = books.parse_html(html);
         //books.getDescription(document);
