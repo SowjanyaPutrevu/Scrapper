@@ -63,8 +63,8 @@ public class CassedroLibre extends Scrapper {
      }*/
     private List<String> getEnglishBooks(){
         List<String> list = new ArrayList<>();
-        for(int i = 86; i <= 100; i++) {
-            String url = Constants.ART_BOOKS.replace("%data%",i+"");
+        for(int i = 0; i <= 50; i++) {
+            String url = Constants.ENGLISH_BOOKS.replace("%data%",i+"");
             String html = get_html(url);
             Document document = parse_html(html);
             Elements h2 = document.getElementsByTag("h2");
@@ -339,7 +339,7 @@ public class CassedroLibre extends Scrapper {
         // books.getProductUrl();
         String filePath = "C:\\Users\\Sowjanya\\Documents\\casadellibro";
         // books.brandSpecs(url);
-        books.writeFile(filePath + File.separator + "Art86-100"+".csv");
+        books.writeFile(filePath + File.separator + "EnglishBooks"+".csv");
         //String html = books.get_html(url);
         //Document document = books.parse_html(html);
         //books.getDescription(document);

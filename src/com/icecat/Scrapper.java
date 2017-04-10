@@ -112,6 +112,4 @@ public abstract class Scrapper {
         if ( html == null ) return null;
         return Jsoup.parse(html);
     }
-
-
 }
