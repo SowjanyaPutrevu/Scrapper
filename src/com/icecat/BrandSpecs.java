@@ -23,10 +23,20 @@ public class BrandSpecs {
     public void setSpecUrl(List<String> specUrl) {
         this.specUrl = specUrl;
     }
+    private String pdf;
+
+    public String getPdf() {
+        return pdf;
+    }
+
+    public void setPdf(String pdf) {
+        this.pdf = pdf;
+    }
 
     public Set<String> getProductImages() {
 
         return productImages;
+
     }
 
     public void setProductImages(Set<String> productImages) {
@@ -35,13 +45,54 @@ public class BrandSpecs {
 
     private String description;
 
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getAge() {
+        return age;
+    }
+
+    public void setAge(String age) {
+        this.age = age;
+    }
+
+    public String getPieces() {
+        return pieces;
+    }
+
+    public void setPieces(String pieces) {
+        this.pieces = pieces;
+    }
+
+    public String getVip() {
+        return vip;
+    }
+
+    public void setVip(String vip) {
+        this.vip = vip;
+    }
+
     public String getCategory() {
+
         return category;
     }
 
     public void setCategory(String category) {
         this.category = category;
     }
+
+    private String code;
+
+    private String age;
+
+    private String pieces;
+
+    private String vip;
 
     private String name;
 

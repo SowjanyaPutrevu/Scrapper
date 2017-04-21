@@ -1,5 +1,6 @@
 package com.icecat;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -7,6 +8,8 @@ import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by Sowji on 05/01/2017.
@@ -25,6 +28,7 @@ public abstract class Scrapper {
 
     public static String cookies;
     public static int counter;
+    public static String DEFAULT_USER_AGENT ="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36";
 
     public String get_html( String site){
 
@@ -38,7 +42,7 @@ public abstract class Scrapper {
             HttpURLConnection conn = (HttpURLConnection) obj.openConnection();
             conn.setReadTimeout(60000);
             conn.addRequestProperty("Accept-Language", "en-US,en;q=0.8");
-            conn.addRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36");
+            conn.addRequestProperty("User-Agent", DEFAULT_USER_AGENT);
             if (cookies!=null && !cookies.isEmpty()) conn.setRequestProperty("Cookie", cookies);
             boolean redirect = false;
             // normally, 3xx is redirect
@@ -111,5 +115,41 @@ public abstract class Scrapper {
     public Document parse_html(String html){
         if ( html == null ) return null;
         return Jsoup.parse(html);
+    }
+
+    public String sendPost(String url, String urlParameters, String useragent) throws Exception {
+
+        URL obj = new URL(url);
+        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+
+        //add reuqest header
+        con.setRequestMethod("POST");
+        con.setRequestProperty("User-Agent", useragent);
+        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+
+        // Send post request
+        con.setDoOutput(true);
+        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+        wr.writeBytes(urlParameters);
+        wr.flush();
+        wr.close();
+
+        int responseCode = con.getResponseCode();
+        System.out.print("Sending 'POST' request to URL : " + url);
+        System.out.print(" " + urlParameters);
+        System.out.println(" -- Response Code : " + responseCode);
+
+        BufferedReader in = new BufferedReader(
+                new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer response = new StringBuffer();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+
+        return response.toString();
+
     }
 }
