@@ -3,7 +3,6 @@ package com.icecat.brandora.de;
 import com.icecat.BrandSpecs;
 import com.icecat.Scrapper;
 import com.icecat.Utils;
-import germany.Masters;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -19,7 +18,7 @@ public class Brandora extends Scrapper {
 
     private List<String> getProductList(){
         List<String> products = new LinkedList<>();
-        for(int i = 0; i <= 64; i+=32) {
+        for(int i = 1632 ; i <= 2016 ; i+=32) {
             String url = Constants.PRODUCT_URL.replace("%data%",i+"");
             String html = get_html(url);
             Document document = parse_html(html);
@@ -30,7 +29,7 @@ public class Brandora extends Scrapper {
                 products.add(productsUrl);
             }
         }
-       // System.out.println(products.get(0));
+       //System.out.println(products);
         return products;
     }
     private Map<String,String> details(Document document){
@@ -82,6 +81,7 @@ public class Brandora extends Scrapper {
 
         List<String> images = imageList(html);
         brandSpecs.setImagesList(images);
+
         System.out.println(brandSpecs);
         return brandSpecs;
 
@@ -110,20 +110,18 @@ public class Brandora extends Scrapper {
                 "\"Image19\"," +
                 "\"Image20\"," ;
 
-
-
-            List<String> list = brandora.getProductList();
-
             List<String> extraHeaders = new ArrayList<>();
             Set<String> extraHeaderSet = new HashSet<>();
             try {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(filePath));
-                for(int i = 0; i < list.size() ; i++) {
-                    String url = list.get(i);
+                List<String> list = brandora.getProductList();
+                for(int index = 0 ; index < list.size() ;index++) {
+                    String url = list.get(index);
+
                     BrandSpecs brandSpecs = brandora.brandSpecs(url);
                     String description = brandSpecs.getDescription() != null ? brandSpecs.getDescription() : "null";
                     bw.write("\"" + Utils.formatForCSV(description) + "\",");
-                    i = 0;
+                    int i = 0;
                     //pictures 3
                     List<String> images = brandSpecs.getImagesList();
                     if (images != null)
@@ -136,29 +134,29 @@ public class Brandora extends Scrapper {
                         bw.write(",");
                         i++;
                     }
-                    Map<String, String> features = brandSpecs.getDetails();
-                    for (String key : features.keySet()) {
-                        if (!extraHeaderSet.contains(key)) {
-                            extraHeaders.add(key);
-                            extraHeaderSet.add(key);
-                        }
-                    }
-                    for (String key : extraHeaders) {
-                        bw.write("\"" + Utils.formatForCSV(features.get(key)) + "\",");
-                    }
-                    bw.newLine();
 
-                    System.out.println("Wrote " + i + " product to file");
+                i = 0;
+                Map<String, String> features = brandSpecs.getDetails();
+                for(String key: features.keySet()){
+                    if( !extraHeaderSet.contains(key) ){
+                        extraHeaders.add(key);
+                        extraHeaderSet.add(key);
+                    }
                 }
-        bw.flush();
-        bw.close();
+                for(String key : extraHeaders) {
+                    bw.write( "\"" + Utils.formatForCSV(features.get(key)) + "\",");
+                }
+                bw.newLine();
+            }
+            bw.flush();
+            bw.close();
             }catch (Exception e){
                 e.printStackTrace();
             }
-        try {
+            try {
             for(String s : extraHeaders){
                 headers += "\"" + s + "\",";
-            }
+             }
             headers += "\n";
 
             File mFile = new File(filePath);
@@ -179,12 +177,15 @@ public class Brandora extends Scrapper {
    }
     public static void main(String[] args) {
         Brandora brandora = new Brandora();
-        String filePath = "C:\\Users\\Sowjanya\\Documents\\Brandora\\Toys.csv";
-        brandora.writeFile(filePath);
+        String filePath = "C:\\Users\\Sowjanya\\Documents\\Brandora";
+        brandora.writeFile(filePath + File.separator + "Toys6"+".csv");
+
+        // brandora.getProductList();
        /* List<String>list=  brandora.getProductList();
         for(int i = 0 ; i < list.size(); i++){
             brandora.brandSpecs(list.get(i));
         }*/
+       //brandora.brandSpecs("http://www.brandora.de/ProductPage.aspx?IzmLang=9&Pro=394239&PRT=toys&OPS=2&LUR=http%3a%2f%2fwww.brandora.de%2fProductListPage.aspx%3fIzmLang%3d9%26PRT%3dtoys%26LPS%3d0%26&");
         //brandora.details();
 
     }

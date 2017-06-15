@@ -63,7 +63,7 @@ public class CassedroLibre extends Scrapper {
      }*/
     private List<String> getEnglishBooks(){
         List<String> list = new ArrayList<>();
-        for(int i = 0; i <= 50; i++) {
+        for(int i = 161; i <= 170; i++) {
             String url = Constants.ENGLISH_BOOKS.replace("%data%",i+"");
             String html = get_html(url);
             Document document = parse_html(html);
@@ -216,19 +216,26 @@ public class CassedroLibre extends Scrapper {
         String headers = "\"Title\"," +
                 "\"Author\"," +
                 "\"Author Description\"," +
-                "\"Publisher\"," +
                 "\"Description\"," +
                 "\"Image1\"," +
-                "\"Image2\"," +
-                "\"Image3\"," +
-                "\"Category\",";
+                "\"Number of Pages\","+
+                "\"ISBN\","+
+                "\"Encuadernación\","+
+                "\"Año edición\","+
+                "\"Lengua\","+
+                "\"Editorial\","+
+                "\"Plaza de edición\","+
+                "\"unknown0\","+
+                "\"Traductor\","+
+                "\"Ilustrador\","+
+                "\"Traductores\",";                ;
 
-        List<String> extraHeaders = new ArrayList<>();
-        Set<String> extraHeaderSet = new HashSet<>();
+
 
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(filePath));
-
+            bw.write(headers);
+            bw.newLine();
             List<String> bookList = books.getEnglishBooks();
             for(int index = 0 ; index < bookList.size() ;index++) {
                 String url = bookList.get(index);
@@ -237,7 +244,6 @@ public class CassedroLibre extends Scrapper {
                 bw.write("\"" + Utils.formatForCSV(brandSpecs.getName()) + "\",");
                 bw.write("\"" + Utils.formatForCSV(brandSpecs.getBrand_name()) + "\",");
                 bw.write("\"" + Utils.formatForCSV(brandSpecs.getAuthorDesc()) + "\",");
-                bw.write("\"" + Utils.formatForCSV(brandSpecs.getPublisher()) + "\",");
                 // bw.write("\""+Utils.formatForCSV(brandSpecs.getCategory()) + "\",");
                 String description = brandSpecs.getDescription() != null ? brandSpecs.getDescription() : "null";
                 bw.write("\"" + Utils.formatForCSV(description) + "\",");
@@ -248,49 +254,42 @@ public class CassedroLibre extends Scrapper {
                     for (String image : images) {
                         bw.write("\"" + Utils.formatForCSV(image) + "\",");
                         i++;
-                        if (i == 3) break;
+                        if (i == 1) break;
                     }
-                while (i < 3) {
+                while (i < 1) {
                     bw.write(",");
                     i++;
                 }
                 i = 0;
                 Map<String, String> features = brandSpecs.getDetails();
-                for(String key: features.keySet()){
-                    if( !extraHeaderSet.contains(key) ){
-                        extraHeaders.add(key);
-                        extraHeaderSet.add(key);
-                    }
-                }
-                for(String key : extraHeaders) {
-                    bw.write( "\"" + Utils.formatForCSV(features.get(key)) + "\",");
-                }
+                String pages = features.get("Nº de páginas") != null ? features.get("Nº de páginas") : "null";
+                String isbn = features.get("ISBN") != null ? features.get("ISBN") : "null";
+                String encudernacion = features.get("Encuadernación") != null ? features.get("Encuadernación") : "null";
+                String anoedicion = features.get("Año edición") != null ? features.get("Año edición") : "null";
+                String lengua = features.get("Lengua") != null ? features.get("Lengua") : "null";
+                String editorial = features.get("Editorial") != null ? features.get("Editorial") : "null";
+                String place = features.get("Plaza de edición") != null ? features.get("Plaza de edición") : "null";
+                String unknown0 = features.get("unknown0") != null ? features.get("unknown0") : "null";
+                String traductor = features.get("Traductor") != null ? features.get("Traductor") : "null";
+                String illustrador = features.get("Ilustrador") != null ? features.get("Ilustrador") : "null";
+                String traductores = features.get("Traductores") != null ? features.get("Traductores") : "null";
+
+                bw.write("\""+Utils.formatForCSV(pages)+"\",");
+                bw.write("\""+Utils.formatForCSV(isbn)+"\",");
+                bw.write("\""+Utils.formatForCSV(encudernacion)+"\",");
+                bw.write("\""+Utils.formatForCSV(anoedicion)+"\",");
+                bw.write("\""+Utils.formatForCSV(lengua)+"\",");
+                bw.write("\""+Utils.formatForCSV(editorial)+"\",");
+                bw.write("\""+Utils.formatForCSV(place)+"\",");
+                bw.write("\""+Utils.formatForCSV(unknown0)+"\",");
+                bw.write("\""+Utils.formatForCSV(traductor)+"\",");
+                bw.write("\""+Utils.formatForCSV(illustrador)+"\",");
+                bw.write("\""+Utils.formatForCSV(traductores)+"\",");
                 bw.newLine();
             }
             bw.flush();
             bw.close();
         }catch (Exception e){
-            e.printStackTrace();
-        }
-        try {
-            for(String s : extraHeaders){
-                headers += "\"" + s + "\",";
-            }
-            headers += "\n";
-
-            File mFile = new File(filePath);
-            BufferedReader br = new BufferedReader(new FileReader(filePath));
-            String result = "";
-            String line = "";
-            while( (line = br.readLine()) != null){
-                result = result + line;
-                result += "\n";
-            }
-            result = headers + result;
-            FileOutputStream fos = new FileOutputStream(mFile);
-            fos.write(result.getBytes());
-            fos.flush();
-        }catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -339,7 +338,7 @@ public class CassedroLibre extends Scrapper {
         // books.getProductUrl();
         String filePath = "C:\\Users\\Sowjanya\\Documents\\casadellibro";
         // books.brandSpecs(url);
-        books.writeFile(filePath + File.separator + "EnglishBooks"+".csv");
+        books.writeFile(filePath + File.separator + "english161-170"+".csv");
         //String html = books.get_html(url);
         //Document document = books.parse_html(html);
         //books.getDescription(document);

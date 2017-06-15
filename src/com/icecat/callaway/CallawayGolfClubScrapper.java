@@ -101,7 +101,7 @@ public class CallawayGolfClubScrapper extends Scrapper {
             brandSpecs.setDescription(description.text());
 
         Map<String,String> fdescription = new HashMap<>();
-        Map<String, String> fImages     = new HashMap<>();
+        Map<String,String> fImages     = new HashMap<>();
 
         Elements tags = brandDocument.getElementsByClass("product-technology-feature-text");
         Elements tagImages = brandDocument.getElementsByClass("product-technology-feature-img");
