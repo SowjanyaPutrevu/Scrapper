@@ -63,7 +63,7 @@ public class CassedroLibre extends Scrapper {
      }*/
     private List<String> getEnglishBooks(){
         List<String> list = new ArrayList<>();
-        for(int i = 161; i <= 170; i++) {
+        for(int i = 56; i <= 60; i++) {
             String url = Constants.ENGLISH_BOOKS.replace("%data%",i+"");
             String html = get_html(url);
             Document document = parse_html(html);
@@ -79,17 +79,19 @@ public class CassedroLibre extends Scrapper {
             System.out.println("Fetched a product"+i);
         }
         //System.out.println(list);
-        //System.out.println(list.size());
+        System.out.println(list.size());
         return list;
     }
     private String getTitle(Document document){
         String[] titleText = null;
-        Elements elements = document.getElementsByTag("h1");
-        for(Element element : elements) {
-            String title = (element.text());
-            titleText = title.split("(En papel)");
-            //System.out.println(title);
-        }      // return titleText[0].replace("(", " ");
+
+            Elements elements = document.getElementsByTag("h1");
+            for (Element element : elements) {
+                String title = (element.text());
+                titleText = title.split("(En papel)");
+                //System.out.println(title);
+            }
+
         return  titleText[0].replace("(", " ");
     }
 
@@ -338,7 +340,7 @@ public class CassedroLibre extends Scrapper {
         // books.getProductUrl();
         String filePath = "C:\\Users\\Sowjanya\\Documents\\casadellibro";
         // books.brandSpecs(url);
-        books.writeFile(filePath + File.separator + "english161-170"+".csv");
+        books.writeFile(filePath + File.separator + "Narrative56-60"+".csv");
         //String html = books.get_html(url);
         //Document document = books.parse_html(html);
         //books.getDescription(document);

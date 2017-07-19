@@ -12,6 +12,14 @@ public class BrandSpecs {
 
     private List<String> imagesList;
 
+    public String getIsbn() {
+        return isbn;
+    }
+
+    public void setIsbn(String isbn) {
+        this.isbn = isbn;
+    }
+
     private Set<String> productImages;
 
     private List<String> specUrl;
@@ -19,6 +27,8 @@ public class BrandSpecs {
     public List<String> getSpecUrl() {
         return specUrl;
     }
+
+    private String isbn;
 
     public void setSpecUrl(List<String> specUrl) {
         this.specUrl = specUrl;
@@ -287,6 +297,9 @@ public class BrandSpecs {
                 ",details="+details+
                 ",publisher="+publisher+
                 ",authorDesc="+authorDesc+
+                ",code="+code+
+                ",isbn="+isbn+
+                ",category="+category+
                 '}';
     }
 }
